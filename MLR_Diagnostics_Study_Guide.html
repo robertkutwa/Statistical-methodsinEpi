@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for diagnostics in multiple linear regression.">
+  <title>MLR Diagnostics | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('mlr-theme') || 'light';</script>
+  <style>
+    :root { --bg:#f3f1eb; --surface:#fffdf8; --surface-2:#e8f0ed; --text:#192c2a; --muted:#64736f; --line:#d5dfda; --accent:#c45132; --accent-2:#147d70; --ink:#163b38; --shadow:0 16px 42px rgba(25,48,44,.08); }
+    [data-theme="dark"] { --bg:#152321; --surface:#1d302d; --surface-2:#29413d; --text:#eef5ef; --muted:#b3c5bf; --line:#3d5953; --accent:#f08a61; --accent-2:#55c4ae; --ink:#eaf8f1; --shadow:0 16px 42px rgba(0,0,0,.25); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.65 Georgia, "Times New Roman", serif; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .hero { background:var(--ink); color:#f7f3e9; padding:64px 24px 54px; position:relative; overflow:hidden; }
+    .hero:after { content:""; position:absolute; width:420px; height:420px; border:1px solid rgba(240,138,97,.5); border-radius:50%; right:-120px; top:-190px; box-shadow:0 0 0 38px rgba(240,138,97,.08),0 0 0 76px rgba(240,138,97,.06); }
+    .hero-inner, .layout { max-width:1180px; margin:auto; }
+    .eyebrow { text-transform:uppercase; letter-spacing:.13em; font-size:.75rem; font-weight:800; opacity:.78; }
+    h1 { font:700 clamp(2.2rem,5vw,4.5rem)/1.05 Georgia, "Times New Roman", serif; max-width:800px; margin:12px 0 16px; }
+    .subtitle { max-width:720px; font-size:1.08rem; opacity:.88; }
+    .toolbar { display:flex; gap:12px; flex-wrap:wrap; margin-top:28px; }
+    button, input { font:inherit; }
+    button { border:0; cursor:pointer; }
+    .button { border-radius:8px; padding:10px 17px; background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); font-weight:700; }
+    .button:hover { background:rgba(255,255,255,.25); }
+    .layout { display:grid; grid-template-columns:240px minmax(0,1fr); gap:32px; padding:38px 24px 70px; }
+    .sidebar { position:sticky; top:20px; align-self:start; }
+    .side-title { color:var(--muted); font-size:.75rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; margin:0 0 10px; }
+    .toc { display:grid; gap:5px; }
+    .toc a { padding:8px 12px; border-left:2px solid var(--line); color:var(--muted); font-size:.93rem; }
+    .toc a:hover { color:var(--accent); border-color:var(--accent); text-decoration:none; }
+    main { min-width:0; }
+    .intro, .topic, .accuracy, .exam { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:28px; margin-bottom:22px; box-shadow:var(--shadow); }
+    .intro { border-top:4px solid var(--accent-2); }
+    h2 { font-size:1.65rem; margin:0 0 15px; letter-spacing:-.025em; }
+    h3 { font-size:1.15rem; margin:24px 0 9px; color:var(--accent); }
+    p { margin:9px 0; }
+    ul, ol { padding-left:22px; }
+    li + li { margin-top:6px; }
+    .topic { scroll-margin-top:20px; }
+    .topic { cursor:pointer; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+    .topic:hover, .topic:focus-visible { transform:translateY(-2px); border-color:var(--accent-2); box-shadow:0 20px 44px rgba(25,48,44,.13); outline:none; }
+    .topic-head { display:flex; align-items:flex-start; gap:14px; }
+    .number { flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:12px; background:var(--surface-2); color:var(--accent); font-weight:900; }
+    .topic h2 { margin:2px 0 0; }
+    .tag { display:inline-block; border-radius:999px; padding:3px 10px; background:color-mix(in srgb, var(--accent-2) 14%, transparent); color:var(--accent-2); font-weight:800; font-size:.78rem; }
+    .callout { margin:18px 0; padding:15px 17px; background:var(--surface-2); border-left:4px solid var(--accent); border-radius:10px; }
+    details { margin:20px 0 4px; border-top:1px solid var(--line); }
+    summary { cursor:pointer; color:var(--accent-2); font-weight:800; padding:14px 0 4px; }
+    details p { color:var(--muted); font-size:.95rem; }
+    .formula { padding:15px; margin:15px 0; text-align:center; background:#171b2b; color:#f7f8ff; border-radius:12px; overflow:auto; }
+    [data-theme="dark"] .formula { background:#0c0f19; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:18px 0; }
+    .mini { padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--bg); }
+    .mini strong { display:block; color:var(--accent); margin-bottom:5px; }
+    .table-wrap { overflow:auto; }
+    table { border-collapse:collapse; width:100%; min-width:650px; font-size:.92rem; }
+    th, td { border-bottom:1px solid var(--line); padding:12px 10px; text-align:left; vertical-align:top; }
+    th { color:var(--accent); background:var(--surface-2); }
+    .checklist { list-style:none; padding:0; }
+    .checklist li { padding:12px 14px; border:1px solid var(--line); border-radius:12px; margin:9px 0; }
+    .checklist li:before { content:"✓"; color:var(--accent-2); font-weight:900; margin-right:10px; }
+    .search { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 13px; margin-bottom:14px; background:var(--surface); color:var(--text); }
+    .hidden { display:none; }
+    body.modal-open { overflow:hidden; }
+    .modal-backdrop { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:22px; background:rgba(16,35,32,.68); opacity:0; pointer-events:none; transition:opacity .2s ease; }
+    .modal-backdrop.open { opacity:1; pointer-events:auto; }
+    .modal { width:min(680px,100%); max-height:min(760px,90vh); overflow:auto; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:12px; box-shadow:0 24px 80px rgba(0,0,0,.3); padding:30px; transform:translateY(12px); transition:transform .2s ease; }
+    .modal-backdrop.open .modal { transform:translateY(0); }
+    .modal-top { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .modal h2 { color:var(--ink); margin:0; }
+    [data-theme="dark"] .modal h2 { color:var(--text); }
+    .modal-close { flex:none; width:36px; height:36px; border:1px solid var(--line); border-radius:50%; background:transparent; color:var(--text); font-size:1.35rem; line-height:1; }
+    .modal-close:hover { background:var(--surface-2); }
+    .modal-kicker { color:var(--accent); text-transform:uppercase; letter-spacing:.11em; font:800 .72rem/1.2 Georgia,serif; margin:0 0 8px; }
+    .modal h3 { margin-top:22px; }
+    .modal h4 { margin:18px 0 5px; color:var(--accent-2); font-size:1rem; }
+    .modal .definition { padding:13px 15px; margin:15px 0; border:1px solid var(--line); border-left:4px solid var(--accent-2); background:var(--bg); border-radius:8px; }
+    .modal .caution { padding:13px 15px; margin:15px 0; border-left:4px solid var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); border-radius:8px; }
+    footer { text-align:center; color:var(--muted); padding:0 24px 36px; font-size:.88rem; }
+    @media (max-width:800px) { .layout { display:block; padding-top:22px; } .sidebar { position:static; margin-bottom:24px; } .toc { display:flex; overflow:auto; gap:6px; padding-bottom:5px; } .toc a { white-space:nowrap; border-left:0; border-bottom:2px solid var(--line); } .intro,.topic,.accuracy,.exam { padding:21px; border-radius:17px; } .modal { padding:23px; } }
+    @media print { .hero { padding:25px; } .toolbar,.sidebar,.search { display:none; } .layout { display:block; padding:20px; } .intro,.topic,.accuracy,.exam { box-shadow:none; break-inside:avoid; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 3 · Week 6</div>
+      <h1>Diagnostics for Multiple Linear Regression</h1>
+      <div class="subtitle">A practical study guide to detecting, interpreting, and responding to violations of MLR assumptions.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#non-normal">Non-normal errors</a><a href="#nonlinear">Non-linearity</a><a href="#collinearity">Multicollinearity</a><a href="#hetero">Heteroskedasticity</a><a href="#influence">Influence</a><a href="#accuracy">Accuracy check</a><a href="#exam">Exam prep</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>MLR diagnostics focus on five common problems: <strong>non-normal errors</strong>, <strong>non-linearity</strong>, <strong>multicollinearity</strong>, <strong>heteroskedasticity</strong>, and <strong>outliers, leverage, and influential points</strong>.</p>
+        <div class="grid"><div class="mini"><strong>Detect</strong>Use residual plots, formal tests, and diagnostic statistics.</div><div class="mini"><strong>Interpret</strong>Distinguish a violated assumption from a harmless unusual observation.</div><div class="mini"><strong>Respond</strong>Transform, refit, reweight, remove, or report sensitivity.</div></div>
+      </section>
+
+      <section class="topic searchable" id="non-normal"><div class="topic-head"><div class="number">A</div><h2>Non-normal errors <span class="tag">Slide 3</span></h2></div>
+        <p><strong>Detect with:</strong> studentized deleted residuals, a histogram or stem-and-leaf plot, a normal probability plot, and the Shapiro–Wilk test.</p>
+        <h3>Remedies by shape</h3><ul><li><strong>Positive skew:</strong> try square-root, log, or negative reciprocal transformations of the outcome; test each for normality.</li><li><strong>Single or few outliers:</strong> check whether they are also influential.</li><li><strong>Negative skew, large n:</strong> the Central Limit Theorem may provide approximate normality for the test statistic.</li><li><strong>Negative skew, small n:</strong> try squared, cubic, exponential, or $\log_{10}(\max(y+1)-y)$ transformations.</li></ul>
+      </section>
+
+      <section class="topic searchable" id="nonlinear"><div class="topic-head"><div class="number">B</div><h2>Non-linearity & polynomial fitting <span class="tag">Slides 4–7</span></h2></div>
+        <p>Plot studentized deleted residuals against the <strong>partial effect</strong> of a covariate and smooth the scatter.</p>
+        <ol><li>If the smoothed line is straight, the relationship is linear—stop.</li><li>If it curves, add a <strong>mean-centred squared term</strong> and refit.</li><li>Recheck residuals. If they still curve, add a cubic (third-order) term.</li><li>Fourth-order terms are out of scope; orthogonal polynomials are suggested for advanced work.</li></ol>
+        <div class="callout"><strong>Interpretation tip:</strong> the course focuses on quadratic and cubic polynomials because higher-order terms are difficult to interpret.</div>
+      </section>
+
+      <section class="topic searchable" id="collinearity"><div class="topic-head"><div class="number">C</div><h2>Multicollinearity <span class="tag">Slides 8–14</span></h2></div>
+        <p>Multicollinearity occurs when one explanatory variable can be linearly explained by the others. Perfect collinearity ($r=\pm1$) makes $X^TX$ singular, so least-squares estimation fails.</p>
+        <h3>Detection: variance inflation factor</h3><div class="formula">$$VIF_i = \frac{1}{1-R_i^2}$$</div><p>Here, $R_i^2$ comes from regressing $x_i$ on all other covariates. A common course rule is <strong>VIF &gt; 10</strong>, equivalent to $R_i^2 &gt; 0.90$ and approximately $R_i &gt; 0.95$.</p>
+        <h3>Remedies and consequences</h3><ul><li>Remove the offending variable or replace it with a non-collinear proxy.</li><li>Collect more observations, transform continuous variables, or use ratios/logs.</li><li>Mean-centre both $x$ and $x^2$ when polynomial predictors are collinear.</li><li>If ignored: standard errors inflate and coefficient conclusions become unreliable.</li></ul>
+      </section>
+
+      <section class="topic searchable" id="hetero"><div class="topic-head"><div class="number">D</div><h2>Heteroskedasticity <span class="tag">Slides 15–18</span></h2></div>
+        <p><strong>Homoskedasticity</strong> means constant variance of $Y$ across predictor levels. Heteroskedasticity violates this assumption—for example, income variance may grow with age.</p>
+        <p><strong>Detect with:</strong> the Breusch–Pagan test. A significant result indicates heteroskedasticity.</p>
+        <h3>Remedies</h3><ol><li>Fit weighted multiple linear regression (WMLR), using weights inversely proportional to the variance.</li><li>Transform $y$ according to how variance scales with its mean:</li></ol><div class="grid"><div class="mini"><strong>Variance ∝ mean²</strong>Cone-shaped/lognormal spread → log transform.</div><div class="mini"><strong>Variance ∝ mean</strong>Wedge-shaped spread → square transform.</div><div class="mini"><strong>Variance decreases</strong>With the mean → reciprocal transform.</div></div>
+      </section>
+
+      <section class="topic searchable" id="influence"><div class="topic-head"><div class="number">E</div><h2>Outliers, leverage & influence <span class="tag">Slides 19–25</span></h2></div>
+        <div class="grid"><div class="mini"><strong>Outlier</strong>Extreme in <strong>y</strong> only; has a large residual.</div><div class="mini"><strong>High leverage</strong>Extreme in <strong>x</strong> only.</div><div class="mini"><strong>Influential</strong>Extreme in both x and y; can distort estimates.</div></div>
+        <h3>Leverage</h3><div class="formula">$$h_i = \frac{1}{n} + \frac{(x_i-\bar{x})^2}{\sum_{j=1}^{n}(x_j-\bar{x})^2}$$</div><p>Values lie between 0 and 1. A Hoaglin–Welsch rule flags $h_i &gt; \dfrac{2(p+1)}{n}$, where $p$ is the number of covariates.</p>
+        <h3>Influence</h3><div class="formula">$$D_i = \frac{e_i^2}{p\,s^2}\cdot\frac{h_i}{(1-h_i)^2}$$</div><p>Cook’s distance is often flagged at $D_i &gt; 1$. Also consider DFFITS and DFBETAS.</p><div class="callout"><strong>Best practice:</strong> report influential points and fit the model both with and without them to assess sensitivity. Do not remove a point automatically.</div>
+      </section>
+
+      <section class="accuracy searchable" id="accuracy"><h2>Accuracy check</h2><div class="table-wrap"><table><thead><tr><th>Item</th><th>Verdict</th><th>Note</th></tr></thead><tbody><tr><td>VIF formula</td><td>✅ Correct</td><td>Standard definition.</td></tr><tr><td>VIF &gt; 10</td><td>⚠️ Convention</td><td>Other fields use stricter thresholds such as 5 or 2.5.</td></tr><tr><td>Perfect collinearity</td><td>✅ Correct</td><td>Exact dependence makes the design matrix non-invertible.</td></tr><tr><td>Leverage and Cook’s D rules</td><td>✅ Valid conventions</td><td>Some texts also use Cook’s $D &gt; 4/n$ as a sensitive flag.</td></tr><tr><td>Breusch–Pagan test</td><td>✅ Correct</td><td>Standard test for heteroskedasticity.</td></tr><tr><td>Outlier definitions</td><td>✅ Correct</td><td>Outlier, leverage, and influence are distinct concepts.</td></tr></tbody></table></div><p class="callout">Overall, the material is technically sound. Remember that numeric cutoffs are conventions, not universal laws.</p></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>Non-normal errors → Shapiro–Wilk and residual plots → transform based on skew and sample size.</li><li>Non-linearity → smooth partial-effect residuals → add centred quadratic, then cubic terms.</li><li>Multicollinearity → VIF &gt; 10 is the course red flag → remove, replace, collect data, transform, or centre.</li><li>Heteroskedasticity → Breusch–Pagan → WMLR or a matched y-transformation.</li><li>Outlier vs leverage vs influence → use leverage and Cook’s D → refit with and without unusual points.</li></ul><h3>Formula sheet</h3><div class="formula">$$VIF_i = \frac{1}{1-R_i^2} \qquad h_i = \frac{1}{n} + \frac{(x_i-\bar{x})^2}{\sum (x_j-\bar{x})^2}$$<br><br>$$D_i = \frac{e_i^2}{p\,s^2}\cdot\frac{h_i}{(1-h_i)^2}$$</div><h3>Likely exam question</h3><div class="callout"><em>What is heteroskedasticity? How can it be detected? If found, how can multiple linear regression be fitted?</em><br><br>Answer with: definition → Breusch–Pagan test → WMLR or a variance-stabilizing transformation.</div><h3>Mnemonic</h3><p><strong>Outlier</strong> = weird Y · <strong>Leverage</strong> = weird X · <strong>Influential</strong> = weird X and Y together.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p><details><summary>Non-normal errors</summary><ol><li>When several transformations look normal, should interpretability or the most normal residuals decide?</li><li>How large does <em>n</em> need to be before the Central Limit Theorem is a reasonable justification?</li><li>What should be done when the outcome contains zero or negative values?</li></ol></details><details><summary>Non-linearity and polynomials</summary><ol><li>Is there a formal test for linear versus curvilinear relationships?</li><li>How does centring <em>x</em> change interpretation of the squared term?</li><li>When several covariates are present, do we check each partial effect separately?</li></ol></details><details><summary>Multicollinearity</summary><ol><li>Which VIF threshold does the course expect: 10, 5, or both?</li><li>Is ridge regression acceptable when theoretically important predictors are collinear?</li><li>Should VIF be checked again after adding polynomial or interaction terms?</li></ol></details><details><summary>Heteroskedasticity</summary><ol><li>If the Breusch–Pagan test and plot disagree, which evidence should guide the decision?</li><li>How should coefficients on a transformed outcome be explained to a non-statistical audience?</li><li>Can WMLR and an outcome transformation be combined?</li></ol></details><details><summary>Influential observations and assessment</summary><ol><li>When Cook’s distance and leverage flag one point, when is exclusion justified?</li><li>What order should the diagnostics follow, given that one fix can change another diagnostic?</li><li>Are derivations expected, or only application and interpretation?</li><li>Will we work through one numerical example combining all five diagnostics?</li></ol></details></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Prepared from the MLR Diagnostics Study Guide · Open this file in any modern browser.</footer>
+  <script>
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => { const next = root.dataset.theme === 'dark' ? 'light' : 'dark'; root.dataset.theme = next; localStorage.setItem('mlr-theme', next); toggle.textContent = next === 'dark' ? '☀ Light theme' : '☾ Toggle theme'; });
+    const search = document.getElementById('search');
+    const sections = [...document.querySelectorAll('.searchable')];
+    search.addEventListener('input', () => { const term = search.value.trim().toLowerCase(); sections.forEach(section => { section.classList.toggle('hidden', term && !section.textContent.toLowerCase().includes(term)); }); });
+    const topicDetails = {
+      'non-normal': { kicker:'Topic A · Slide 3', title:'Non-normal errors', body:'<p>Normality is an assumption about the random errors, not necessarily about the raw outcome or each predictor. In the model $Y=X\\beta+\\varepsilon$, the question is whether the unexplained component $\\varepsilon$ is plausibly normal after the predictors have been used.</p><div class="definition"><strong>Core idea:</strong> a residual is the observed outcome minus the fitted outcome. A diagnostic residual is useful because it reveals what the model failed to explain.</div><h3>Why it matters</h3><p>Non-normal errors are most consequential in small samples. The coefficient estimates can still be useful, but the usual t-tests, confidence intervals, and overall F-test rely more heavily on normal-error theory. With a large sample, the Central Limit Theorem often makes the sampling distribution of estimates approximately normal even when individual errors are not.</p><h3>Studentized deleted residuals</h3><p>A raw residual is not directly comparable across observations because its variance depends on leverage. A studentized deleted residual refits the model without observation $i$, predicts that omitted observation, and standardizes the prediction error. Removing the point during its own calculation makes the diagnostic less distorted by that point and puts observations on a common scale.</p><h3>Diagnostic workflow</h3><ol><li>Fit the proposed model and calculate studentized deleted residuals.</li><li>Inspect a histogram or stem-and-leaf plot for skew, heavy tails, or isolated extremes.</li><li>Use a normal probability plot to see whether points follow a roughly straight reference pattern.</li><li>Use Shapiro–Wilk as supporting evidence. In large samples, tiny departures can become statistically significant, so combine the test with practical judgment.</li><li>Investigate unusual records before transforming every observation.</li></ol><h3>Choosing a transformation</h3><p>Positive skew often responds to a square-root, log, or negative reciprocal transformation of the outcome. Negative skew may respond to squared, cubic, exponential, or reflected log transformations. There is no universally correct choice: transform, refit, and recheck both the residual shape and the meaning of the coefficients.</p><div class="caution"><strong>Do not confuse symptoms:</strong> one extreme influential observation can create apparent skewness. Diagnose that observation before committing to a transformation of the entire outcome.</div>' },
+      'nonlinear': { kicker:'Topic B · Slides 4–7', title:'Non-linearity and polynomial fitting', body:'<p>A standard MLR model is linear in its parameters and assumes that each predictor contributes a straight-line effect after the other predictors have been accounted for. The word “linear” describes the model form, not a requirement that every real-world relationship be visually straight on its original scale.</p><div class="definition"><strong>Partial effect:</strong> the relationship between the outcome and one covariate after the contribution of the other covariates has been controlled. A raw $Y$-versus-$X$ plot can be misleading when several predictors are active.</div><h3>Reading the smooth</h3><p>Plot studentized deleted residuals against the partial effect of a covariate and add a smooth curve. A roughly horizontal, straight smooth suggests that no systematic curvature remains. A bowl, arch, S-shape, or repeated bend suggests that the model is missing structure.</p><h3>Building a polynomial</h3><ol><li>Start with the linear term and inspect the partial-effect diagnostic.</li><li>If the smooth is curved, create a centred predictor, $x_c=x-\\text{mean}(x)$, and add $x_c^2$.</li><li>Refit the model and inspect residuals for remaining pattern.</li><li>Add $x_c^3$ only when the quadratic model still leaves meaningful, systematic curvature.</li></ol><h3>Why centre before squaring?</h3><p>Raw $x$ and $x^2$ are often strongly correlated because large values drive both terms upward. This structural multicollinearity inflates standard errors and makes coefficients unstable. Centring moves the zero point to the mean, reducing that artificial dependence while preserving the curved relationship.</p><h3>Interpretation</h3><p>In a quadratic model, the coefficient on $x_c^2$ describes curvature: its sign indicates whether the curve bends upward or downward. The linear coefficient describes the slope at the mean of $x$, not necessarily the slope at zero. A cubic term allows the direction of curvature itself to change, but its coefficients are best interpreted with a plot or predicted values rather than in isolation.</p><div class="caution"><strong>Guard against overfitting:</strong> fourth-order and higher polynomials can chase noise, become hard to explain, and behave wildly outside the observed data range. Orthogonal polynomials or splines are more stable advanced alternatives.</div>' },
+      'collinearity': { kicker:'Topic C · Slides 8–14', title:'Multicollinearity', body:'<p>Multicollinearity occurs when one explanatory variable can be predicted from the others. It is common in observational research because several measurements may represent the same underlying construct, such as height, weight, and body size.</p><div class="definition"><strong>Perfect collinearity:</strong> an exact linear dependence, such as one predictor being a precise multiple or sum of others. Then the design matrix is singular and ordinary least squares cannot produce a unique coefficient solution.</div><h3>What it changes and what it does not</h3><p>Ordinary multicollinearity does not automatically bias the coefficients and does not necessarily reduce overall $R^2$ or prediction accuracy. Its main damage is precision: standard errors inflate, confidence intervals widen, coefficient signs can become unstable, and a genuinely useful variable may appear insignificant when considered separately.</p><h3>Understanding VIF</h3><p>For predictor $x_i$, regress $x_i$ on all the other predictors and call the resulting coefficient of determination $R_i^2$. Then $VIF_i=1/(1-R_i^2)$. The factor tells you how much the variance of the coefficient is inflated compared with an otherwise uncorrelated design. At $R_i^2=0.90$, VIF is 10 and the standard error is about 3.16 times larger.</p><h3>Diagnostic workflow</h3><ol><li>Check the correlation matrix for obvious pairs, while remembering that pairwise correlations are not enough.</li><li>Calculate VIF after all intended predictors, polynomial terms, and interactions have been included.</li><li>Find out whether the redundancy is conceptual, measurement-based, or created by the model specification.</li><li>Inspect coefficient stability and confidence intervals, not only whether a VIF crosses a threshold.</li></ol><h3>Remedies</h3><p>Remove one of two redundant variables, replace it with a defensible proxy, combine measurements into an index, transform variables where scientifically appropriate, or collect more observations. More data can reduce standard errors, but it does not remove the underlying correlation. For structural collinearity between $x$ and $x^2$, centre $x$ before squaring rather than deleting the curvature term.</p><div class="caution"><strong>Thresholds are conventions:</strong> VIF above 10 is the course rule, while other fields flag values above 5 or even 2.5. Report the rule you use and explain the substantive decision.</div>' },
+      'hetero': { kicker:'Topic D · Slides 15–18', title:'Heteroskedasticity', body:'<p>Heteroskedasticity means that the variance of the errors is not constant. In a well-behaved residual-versus-fitted plot, the vertical spread should remain broadly similar across the fitted-value range. A fan, cone, wedge, or funnel indicates that some parts of the prediction range are noisier than others.</p><div class="definition"><strong>Homoskedasticity:</strong> the conditional error variance is constant for every observation. Heteroskedasticity replaces that single constant with a variance that depends on predictors or the expected outcome.</div><h3>Why it matters</h3><p>Under the usual exogeneity assumptions, OLS coefficient estimates can remain unbiased despite heteroskedasticity. The problem is that the conventional standard-error formula assumes equal variance. As a result, t-tests, p-values, confidence intervals, and claims of statistical significance can be too optimistic or too conservative.</p><h3>Detection</h3><p>Begin with a residual-versus-fitted plot and residual plots against important predictors. Then use the Breusch–Pagan test, which asks whether squared residuals can be explained by the predictors or fitted values. A significant result is evidence that residual spread changes systematically, but a non-significant result does not prove the variance is perfectly constant.</p><h3>Choosing a remedy</h3><ol><li>Use weighted multiple linear regression when the variance structure can be estimated. Give lower weight to observations with larger error variance while keeping the outcome on its original scale.</li><li>Transform the outcome when a new scale better represents the scientific relationship and stabilizes the spread.</li><li>Use a log transformation when variance is roughly proportional to the square of the mean, as in many positive, right-skewed measurements.</li><li>Use a square transformation when variance is roughly proportional to the mean, or a reciprocal when variance decreases as the mean increases.</li></ol><h3>Interpretation after transformation</h3><p>A transformation changes coefficient meaning. For example, a coefficient in a model for $log(y)$ is naturally interpreted in relative or percentage terms rather than original-unit terms. Explain the scale clearly and, when predictions are transformed back, remember that simply exponentiating an expected log value may require a bias correction.</p><div class="caution"><strong>Visual and formal evidence work together:</strong> a very large sample can make a minor departure significant, while a small sample can make a meaningful pattern hard to detect. Use the plot, the test, and subject-matter context together.</div>' },
+      'influence': { kicker:'Topic E · Slides 19–25', title:'Outliers, leverage, and influence', body:'<p>Regression diagnostics separate three kinds of unusual observation. An <strong>outlier</strong> is unusual in the response direction and has a large residual. A high-<strong>leverage</strong> point is unusual in predictor space. An <strong>influential</strong> observation has enough leverage and residual size to noticeably change the fitted model.</p><div class="definition"><strong>Useful mental model:</strong> leverage is how far a point sits from the centre of the predictor data; the residual is how strongly its outcome disagrees with the fitted trend. Influence needs both distance and disagreement.</div><h3>Leverage</h3><p>For one predictor, leverage is $h_i=1/n+(x_i-mean(x))^2/sum((x_j-mean(x))^2)$. It lies between 0 and 1 and grows as a point moves away from the predictor mean. In multiple regression, leverage is the diagonal of the hat matrix, which measures unusual combinations of predictors, not just one extreme variable.</p><h3>Influence statistics</h3><p>Cook’s distance combines residual size and leverage to estimate how much the complete vector of fitted values would change if an observation were removed. A common course flag is $D_i>1$; some analysts also use $4/n$ as a more sensitive screening rule. DFFITS focuses on the change in a fitted value, while DFBETAS focuses on the change in each individual coefficient.</p><h3>Three scenarios</h3><ul><li>A point can be neither unusual nor influential: the line barely changes.</li><li>A central-x point can be an outlier but not influential because it has little leverage to rotate the line.</li><li>A far-out point can have high leverage but low influence if it lies close to the expected trend.</li></ul><h3>Responsible workflow</h3><ol><li>Flag leverage and influence, then inspect the original record and measurement process.</li><li>Decide whether the point is an error, a valid member of the target population, or evidence that the model is incomplete.</li><li>Refit the model with and without the observation and compare coefficients, predictions, and conclusions.</li><li>Report the sensitivity analysis. Exclusion is defensible only with a transparent methodological or data-quality reason, never merely because the point changes significance.</li></ol><div class="caution"><strong>Influence is not automatic deletion:</strong> a valid extreme case may be scientifically important. Robust regression, separate subgroup analysis, or a better-specified model may be more appropriate responses.</div>' }
+    };
+    const modal = document.getElementById('topicModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalKicker = document.getElementById('modalKicker');
+    const modalBody = document.getElementById('modalBody');
+    const modalClose = document.getElementById('modalClose');
+    let lastTopic;
+    function closeTopic() { modal.classList.remove('open'); document.body.classList.remove('modal-open'); if (lastTopic) lastTopic.focus(); }
+    function openTopic(topic) { const data = topicDetails[topic.id]; if (!data) return; lastTopic = topic; modalKicker.textContent = data.kicker; modalTitle.textContent = data.title; modalBody.innerHTML = data.body; modal.classList.add('open'); document.body.classList.add('modal-open'); modalClose.focus(); if (window.MathJax) MathJax.typesetPromise([modalBody]); }
+    document.querySelectorAll('.topic').forEach(topic => { topic.tabIndex = 0; topic.setAttribute('role','button'); topic.addEventListener('click', event => { if (!event.target.closest('a,button,details,summary,input')) openTopic(topic); }); topic.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTopic(topic); } }); });
+    modalClose.addEventListener('click', closeTopic);
+    modal.addEventListener('click', event => { if (event.target === modal) closeTopic(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) closeTopic(); });
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>
