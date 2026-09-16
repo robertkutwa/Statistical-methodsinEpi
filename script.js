@@ -14,21 +14,107 @@
     { id: 'week08', session: 3, week: 8, title: 'Survival Analysis', subtitle: 'Time-to-event data, censoring, Kaplan-Meier curves, and the Cox model.', href: 'lectures/week08-survival-analysis.html', topics: ['Kaplan-Meier', 'Log-rank test', 'Cox proportional hazards'] }
   ];
 
+  // Update this after deploying the backend (see backend/README section) —
+  // e.g. 'https://epi-stats-api.onrender.com/api'.
+  const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:5000/api'
+    : 'https://epi-stats-api.onrender.com/api';
+
   const THEME_KEY = 'epi-site-theme';
-  const PROGRESS_KEY = 'epi-progress-v1';
+  const TOKEN_KEY = 'epi-auth-token';
+  const EMAIL_KEY = 'epi-auth-email';
   const isLecturePage = location.pathname.includes('/lectures/');
   const base = isLecturePage ? '../' : '';
 
-  function getProgress() {
-    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; }
-    catch (e) { return {}; }
+  // ---------- Auth session ----------
+
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
   }
-  function setProgress(id, done) {
-    const p = getProgress();
-    if (done) p[id] = true; else delete p[id];
-    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch (e) {}
-    return p;
+  function getStoredEmail() {
+    try { return localStorage.getItem(EMAIL_KEY); } catch (e) { return null; }
   }
+  function setSession(token, email) {
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(EMAIL_KEY, email);
+    } catch (e) {}
+    dispatchAuthChange();
+  }
+  function clearSession() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(EMAIL_KEY);
+    } catch (e) {}
+    dispatchAuthChange();
+  }
+  function dispatchAuthChange() {
+    progressCache = null;
+    progressPromise = null;
+    window.dispatchEvent(new CustomEvent('epi-auth-change'));
+  }
+  function onAuthChange(fn) {
+    window.addEventListener('epi-auth-change', fn);
+  }
+
+  async function authFetch(path, options) {
+    const token = getToken();
+    const opts = Object.assign({}, options);
+    opts.headers = Object.assign(
+      { 'Content-Type': 'application/json' },
+      (options && options.headers) || {},
+      token ? { Authorization: 'Bearer ' + token } : {}
+    );
+    let res;
+    try {
+      res = await fetch(API_BASE + path, opts);
+    } catch (e) {
+      throw new Error('Could not reach the server. Please try again in a moment.');
+    }
+    if (res.status === 401 && token) clearSession();
+    return res;
+  }
+
+  async function parseJson(res) {
+    try { return await res.json(); } catch (e) { return {}; }
+  }
+
+  // ---------- Progress (API-backed, with a short in-flight cache) ----------
+
+  let progressCache = null; // { progress, ts }
+  let progressPromise = null;
+  const PROGRESS_CACHE_MS = 4000;
+
+  async function getProgress() {
+    if (!getToken()) return {};
+    if (progressCache && Date.now() - progressCache.ts < PROGRESS_CACHE_MS) return progressCache.progress;
+    if (progressPromise) return progressPromise;
+    progressPromise = authFetch('/progress')
+      .then(parseJson)
+      .then((data) => {
+        progressCache = { progress: data.progress || {}, ts: Date.now() };
+        progressPromise = null;
+        return progressCache.progress;
+      })
+      .catch(() => {
+        progressPromise = null;
+        return {};
+      });
+    return progressPromise;
+  }
+
+  async function setProgress(id, done) {
+    if (!getToken()) return {};
+    const res = await authFetch('/progress/' + encodeURIComponent(id), {
+      method: 'PUT',
+      body: JSON.stringify({ done })
+    });
+    const data = await parseJson(res);
+    progressCache = { progress: data.progress || {}, ts: Date.now() };
+    return progressCache.progress;
+  }
+
+  // ---------- Theme ----------
 
   function initTheme(buttonId) {
     const root = document.documentElement;
@@ -47,6 +133,8 @@
     }
   }
 
+  // ---------- Nav bar + account widget ----------
+
   function initNav(currentId) {
     const mount = document.getElementById('siteNav');
     if (!mount) return;
@@ -61,17 +149,151 @@
           <a href="${base}index.html"${currentId ? '' : ' class="active"'}>Home</a>
           ${links}
         </nav>
+        <div class="site-nav-auth" id="siteNavAuth"></div>
       </div>`;
     reflectProgressDots();
+    renderAuthWidget();
+    onAuthChange(reflectProgressDots);
+    onAuthChange(renderAuthWidget);
   }
 
-  function reflectProgressDots() {
-    const progress = getProgress();
+  async function reflectProgressDots() {
+    const progress = await getProgress();
     document.querySelectorAll('[data-progress-dot]').forEach((dot) => {
       const id = dot.getAttribute('data-progress-dot');
       dot.textContent = progress[id] ? ' ✓' : '';
     });
   }
+
+  function renderAuthWidget() {
+    const mount = document.getElementById('siteNavAuth');
+    if (!mount) return;
+    const token = getToken();
+    const email = getStoredEmail();
+    if (token && email) {
+      mount.innerHTML = `<span class="nav-auth-email" id="navAuthEmail"></span><button type="button" id="navLogoutBtn">Log out</button>`;
+      const emailEl = document.getElementById('navAuthEmail');
+      if (emailEl) { emailEl.textContent = email; emailEl.title = email; }
+      const logoutBtn = document.getElementById('navLogoutBtn');
+      if (logoutBtn) logoutBtn.addEventListener('click', clearSession);
+    } else {
+      mount.innerHTML = `<button type="button" id="navLoginBtn">Log in</button>`;
+      const loginBtn = document.getElementById('navLoginBtn');
+      if (loginBtn) loginBtn.addEventListener('click', () => openAuthModal());
+    }
+  }
+
+  // ---------- Auth modal (login / register), injected once on demand ----------
+
+  let authMode = 'login';
+
+  function ensureAuthModal() {
+    if (document.getElementById('authModal')) return;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+      <div class="modal-backdrop" id="authModal" role="presentation">
+        <article class="modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+          <div class="modal-top">
+            <div><p class="modal-kicker">Account</p><h2 id="authModalTitle">Log in</h2></div>
+            <button class="modal-close" id="authModalClose" type="button" aria-label="Close">&times;</button>
+          </div>
+          <form id="authForm" novalidate>
+            <label class="field">Email<input type="email" id="authEmail" required autocomplete="email"></label>
+            <label class="field">Password<input type="password" id="authPassword" required minlength="8" autocomplete="current-password"></label>
+            <p class="form-error hidden" id="authError"></p>
+            <button class="button" type="submit" id="authSubmit">Log in</button>
+          </form>
+          <p class="form-switch">No account yet? <button type="button" id="authSwitch">Create one</button></p>
+        </article>
+      </div>`;
+    document.body.appendChild(wrap.firstElementChild);
+
+    const modal = document.getElementById('authModal');
+    const form = document.getElementById('authForm');
+    const errorEl = document.getElementById('authError');
+    const closeBtn = document.getElementById('authModalClose');
+    const switchBtn = document.getElementById('authSwitch');
+
+    function close() {
+      modal.classList.remove('open');
+      document.body.classList.remove('modal-open');
+    }
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+
+    switchBtn.addEventListener('click', () => setAuthMode(authMode === 'login' ? 'register' : 'login'));
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorEl.classList.add('hidden');
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      const submitBtn = document.getElementById('authSubmit');
+      submitBtn.disabled = true;
+      const previousLabel = submitBtn.textContent;
+      submitBtn.textContent = authMode === 'login' ? 'Logging in…' : 'Creating account…';
+      try {
+        const res = await authFetch(authMode === 'login' ? '/auth/login' : '/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        });
+        const data = await parseJson(res);
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        setSession(data.token, data.email);
+        form.reset();
+        close();
+      } catch (e) {
+        errorEl.textContent = e.message || 'Could not reach the server.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = previousLabel;
+      }
+    });
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    const title = document.getElementById('authModalTitle');
+    const submit = document.getElementById('authSubmit');
+    const switchBtn = document.getElementById('authSwitch');
+    const switchWrap = switchBtn ? switchBtn.parentElement : null;
+    const password = document.getElementById('authPassword');
+    if (!title || !submit || !switchWrap) return;
+    if (mode === 'login') {
+      title.textContent = 'Log in';
+      submit.textContent = 'Log in';
+      if (password) password.autocomplete = 'current-password';
+      switchWrap.innerHTML = 'No account yet? <button type="button" id="authSwitch">Create one</button>';
+    } else {
+      title.textContent = 'Create account';
+      submit.textContent = 'Create account';
+      if (password) password.autocomplete = 'new-password';
+      switchWrap.innerHTML = 'Already have an account? <button type="button" id="authSwitch">Log in</button>';
+    }
+    document.getElementById('authSwitch').addEventListener('click', () => setAuthMode(mode === 'login' ? 'register' : 'login'));
+    const errorEl = document.getElementById('authError');
+    if (errorEl) errorEl.classList.add('hidden');
+  }
+
+  function openAuthModal(mode) {
+    ensureAuthModal();
+    setAuthMode(mode || 'login');
+    const modal = document.getElementById('authModal');
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    const emailInput = document.getElementById('authEmail');
+    if (emailInput) emailInput.focus();
+  }
+
+  // ---------- Search ----------
 
   function initSearch(inputId, sectionSelector) {
     const search = document.getElementById(inputId || 'search');
@@ -84,6 +306,8 @@
       });
     });
   }
+
+  // ---------- Topic modals ----------
 
   function initTopicModals(topicDetails) {
     const modal = document.getElementById('topicModal');
@@ -125,32 +349,56 @@
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.classList.contains('open')) closeTopic(); });
   }
 
+  // ---------- Per-lecture "mark as reviewed" toggle ----------
+
   function initProgressToggle(pageId, buttonId, onChange) {
     const btn = document.getElementById(buttonId || 'progressToggle');
     if (!btn || !pageId) return;
+
+    const reflectLoggedOut = () => {
+      btn.classList.remove('is-active');
+      btn.textContent = '○ Log in to track progress';
+    };
     const reflect = (done) => {
       btn.classList.toggle('is-active', done);
       btn.textContent = done ? '✓ Reviewed' : '○ Mark as reviewed';
     };
-    reflect(Boolean(getProgress()[pageId]));
-    btn.addEventListener('click', () => {
-      const done = !getProgress()[pageId];
-      setProgress(pageId, done);
-      reflect(done);
-      if (onChange) onChange(done);
+    async function refresh() {
+      if (!getToken()) { reflectLoggedOut(); return; }
+      const progress = await getProgress();
+      reflect(Boolean(progress[pageId]));
+    }
+
+    btn.addEventListener('click', async () => {
+      if (!getToken()) { openAuthModal(); return; }
+      const wantDone = !btn.classList.contains('is-active');
+      btn.disabled = true;
+      const progress = await setProgress(pageId, wantDone);
+      btn.disabled = false;
+      reflect(Boolean(progress[pageId]));
+      if (onChange) onChange(Boolean(progress[pageId]));
     });
+
+    onAuthChange(refresh);
+    refresh();
   }
 
-  function renderLectureFooter(pageId, mountId) {
+  // ---------- End-of-lecture course progress strip + prev/next ----------
+
+  const subscribedFooters = new Set();
+
+  async function renderLectureFooter(pageId, mountId) {
+    const key = pageId + '|' + (mountId || 'lectureFooter');
     const mount = document.getElementById(mountId || 'lectureFooter');
     if (!mount || !pageId) return;
     const idx = COURSE.findIndex((l) => l.id === pageId);
     if (idx === -1) return;
     const prev = idx > 0 ? COURSE[idx - 1] : null;
     const next = idx < COURSE.length - 1 ? COURSE[idx + 1] : null;
-    const progress = getProgress();
+    const loggedIn = Boolean(getToken());
+    const progress = loggedIn ? await getProgress() : {};
     const done = COURSE.filter((l) => progress[l.id]).length;
-    const pct = Math.round((done / COURSE.length) * 100);
+    const pct = loggedIn ? Math.round((done / COURSE.length) * 100) : 0;
 
     const dots = COURSE.map((l) => {
       const cls = ['week-dot'];
@@ -167,19 +415,37 @@
       ? `<a class="nav-card nav-next" href="${base}${next.href}"><span class="nav-card-label">Next →</span><strong>Week ${next.week} · ${next.title}</strong></a>`
       : `<a class="nav-card nav-next" href="${base}index.html"><span class="nav-card-label">🎉 End of course</span><strong>Back to course home</strong></a>`;
 
+    const progressText = loggedIn
+      ? `${done} of ${COURSE.length} reviewed`
+      : `<button type="button" class="inline-login-link" id="lectureFooterLogin">Log in</button> to track progress`;
+
     mount.innerHTML = `
       <div class="course-progress-mini">
-        <div class="course-progress-mini-head"><p class="side-title">Course progress</p><span class="progress-summary-text" id="lectureFooterProgressText">${done} of ${COURSE.length} reviewed</span></div>
-        <div class="progress-bar"><div class="progress-bar-fill" id="lectureFooterProgressFill" style="width:${pct}%"></div></div>
+        <div class="course-progress-mini-head"><p class="side-title">Course progress</p><span class="progress-summary-text">${progressText}</span></div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
         <div class="week-dots">${dots}</div>
       </div>
       <div class="up-next-links">${prevCard}${nextCard}</div>`;
+
+    const loginLink = document.getElementById('lectureFooterLogin');
+    if (loginLink) loginLink.addEventListener('click', () => openAuthModal());
+
+    if (!subscribedFooters.has(key)) {
+      subscribedFooters.add(key);
+      onAuthChange(() => renderLectureFooter(pageId, mountId));
+    }
   }
 
-  function renderCourseGrid(containerId) {
-    const mount = document.getElementById(containerId || 'courseGrid');
+  // ---------- Course home page ----------
+
+  const subscribedGrids = new Set();
+
+  async function renderCourseGrid(containerId) {
+    const key = containerId || 'courseGrid';
+    const mount = document.getElementById(key);
     if (!mount) return;
-    const progress = getProgress();
+    const loggedIn = Boolean(getToken());
+    const progress = loggedIn ? await getProgress() : {};
     let html = '';
     let lastSession = null;
     COURSE.forEach((l) => {
@@ -188,23 +454,45 @@
         lastSession = l.session;
       }
       const done = Boolean(progress[l.id]);
+      const pillText = loggedIn ? (done ? '✓ Reviewed' : 'Not started') : 'Log in to track';
       html += `
         <a class="course-card searchable" href="${l.href}">
           <span class="session-tag">Week ${l.week}</span>
           <h3>${l.title}</h3>
           <p>${l.subtitle}</p>
           <div class="topic-tags">${l.topics.map((t) => `<span>${t}</span>`).join('')}</div>
-          <span class="progress-pill${done ? ' is-done' : ''}">${done ? '✓ Reviewed' : 'Not started'}</span>
+          <span class="progress-pill${done ? ' is-done' : ''}">${pillText}</span>
         </a>`;
     });
     mount.innerHTML = html;
+    if (!subscribedGrids.has(key)) {
+      subscribedGrids.add(key);
+      onAuthChange(() => renderCourseGrid(key));
+    }
   }
 
-  function initProgressSummary(barId, textId) {
+  const subscribedSummaries = new Set();
+
+  async function initProgressSummary(barId, textId) {
+    const key = (barId || 'progressBarFill') + '|' + (textId || 'progressSummaryText');
     const bar = document.getElementById(barId || 'progressBarFill');
     const text = document.getElementById(textId || 'progressSummaryText');
     if (!bar && !text) return;
-    const progress = getProgress();
+
+    if (!subscribedSummaries.has(key)) {
+      subscribedSummaries.add(key);
+      onAuthChange(() => initProgressSummary(barId, textId));
+    }
+
+    const loggedIn = Boolean(getToken());
+    if (!loggedIn) {
+      if (bar) bar.style.width = '0%';
+      if (text) text.innerHTML = '<button type="button" class="inline-login-link" id="progressSummaryLogin">Log in</button> to save your progress across devices';
+      const loginLink = document.getElementById('progressSummaryLogin');
+      if (loginLink) loginLink.addEventListener('click', () => openAuthModal());
+      return;
+    }
+    const progress = await getProgress();
     const done = COURSE.filter((l) => progress[l.id]).length;
     const pct = Math.round((done / COURSE.length) * 100);
     if (bar) bar.style.width = pct + '%';
@@ -213,8 +501,10 @@
 
   window.SITE = {
     COURSE,
+    getToken,
     getProgress,
     setProgress,
+    openAuthModal,
     initTheme,
     initNav,
     initSearch,
