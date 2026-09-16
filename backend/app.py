@@ -24,6 +24,14 @@ def create_app():
     def health():
         return jsonify({'status': 'ok'}), 200
 
+    @app.get('/')
+    def root():
+        return jsonify({
+            'service': 'epi-stats-api',
+            'status': 'ok',
+            'endpoints': ['/api/health', '/api/auth/register', '/api/auth/login', '/api/auth/me', '/api/progress']
+        }), 200
+
     return app
 
 

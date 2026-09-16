@@ -14,11 +14,9 @@
     { id: 'week08', session: 3, week: 8, title: 'Survival Analysis', subtitle: 'Time-to-event data, censoring, Kaplan-Meier curves, and the Cox model.', href: 'lectures/week08-survival-analysis.html', topics: ['Kaplan-Meier', 'Log-rank test', 'Cox proportional hazards'] }
   ];
 
-  // Update this after deploying the backend (see backend/README section) —
-  // e.g. 'https://epi-stats-api.onrender.com/api'.
   const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://127.0.0.1:5000/api'
-    : 'https://epi-stats-api.onrender.com/api';
+    : 'https://statistical-methodsinepi.onrender.com/api';
 
   const THEME_KEY = 'epi-site-theme';
   const TOKEN_KEY = 'epi-auth-token';
