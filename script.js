@@ -77,6 +77,27 @@
     try { return await res.json(); } catch (e) { return {}; }
   }
 
+  // ---------- Toast notifications ----------
+
+  function showToast(message, type) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type === 'error' ? ' toast-error' : '');
+    toast.textContent = message;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+
   // ---------- Progress (API-backed, with a short in-flight cache) ----------
 
   let progressCache = null; // { progress, ts }
@@ -108,6 +129,7 @@
       body: JSON.stringify({ done })
     });
     const data = await parseJson(res);
+    if (!res.ok) throw new Error(data.error || 'Could not save your progress.');
     progressCache = { progress: data.progress || {}, ts: Date.now() };
     return progressCache.progress;
   }
@@ -371,10 +393,15 @@
       if (!getToken()) { openAuthModal(); return; }
       const wantDone = !btn.classList.contains('is-active');
       btn.disabled = true;
-      const progress = await setProgress(pageId, wantDone);
-      btn.disabled = false;
-      reflect(Boolean(progress[pageId]));
-      if (onChange) onChange(Boolean(progress[pageId]));
+      try {
+        const progress = await setProgress(pageId, wantDone);
+        reflect(Boolean(progress[pageId]));
+        if (onChange) onChange(Boolean(progress[pageId]));
+      } catch (e) {
+        showToast(e.message || 'Could not save your progress. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     onAuthChange(refresh);
@@ -438,18 +465,32 @@
 
   const subscribedGrids = new Set();
 
+  function renderSkeletonCards(count) {
+    return Array.from({ length: count || 4 }).map(() => `
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line" style="width:82%;height:18px;"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line" style="width:55%;"></div>
+      </div>`).join('');
+  }
+
   async function renderCourseGrid(containerId) {
     const key = containerId || 'courseGrid';
     const mount = document.getElementById(key);
     if (!mount) return;
     const loggedIn = Boolean(getToken());
+    if (loggedIn && !progressCache) mount.innerHTML = renderSkeletonCards(COURSE.length);
     const progress = loggedIn ? await getProgress() : {};
     let html = '';
     let lastSession = null;
     COURSE.forEach((l) => {
       if (l.session !== lastSession) {
-        html += `<p class="session-heading">Session ${l.session}</p>`;
         lastSession = l.session;
+        const inSession = COURSE.filter((x) => x.session === l.session);
+        const doneInSession = inSession.filter((x) => progress[x.id]).length;
+        const countSuffix = loggedIn ? ` <span class="session-heading-count">— ${doneInSession} of ${inSession.length} reviewed</span>` : '';
+        html += `<p class="session-heading">Session ${l.session}${countSuffix}</p>`;
       }
       const done = Boolean(progress[l.id]);
       const pillText = loggedIn ? (done ? '✓ Reviewed' : 'Not started') : 'Log in to track';
@@ -469,32 +510,92 @@
     }
   }
 
-  const subscribedSummaries = new Set();
+  // ---------- Progress dashboard (circular meter + session breakdown) ----------
 
-  async function initProgressSummary(barId, textId) {
-    const key = (barId || 'progressBarFill') + '|' + (textId || 'progressSummaryText');
-    const bar = document.getElementById(barId || 'progressBarFill');
-    const text = document.getElementById(textId || 'progressSummaryText');
-    if (!bar && !text) return;
+  const subscribedDashboards = new Set();
+  const GAUGE_R = 50;
+  const GAUGE_CIRCUMFERENCE = 2 * Math.PI * GAUGE_R;
 
-    if (!subscribedSummaries.has(key)) {
-      subscribedSummaries.add(key);
-      onAuthChange(() => initProgressSummary(barId, textId));
+  async function renderProgressDashboard(containerId) {
+    const key = containerId || 'progressDashboard';
+    const mount = document.getElementById(key);
+    if (!mount) return;
+
+    if (!subscribedDashboards.has(key)) {
+      subscribedDashboards.add(key);
+      onAuthChange(() => renderProgressDashboard(key));
     }
 
-    const loggedIn = Boolean(getToken());
-    if (!loggedIn) {
-      if (bar) bar.style.width = '0%';
-      if (text) text.innerHTML = '<button type="button" class="inline-login-link" id="progressSummaryLogin">Log in</button> to save your progress across devices';
-      const loginLink = document.getElementById('progressSummaryLogin');
-      if (loginLink) loginLink.addEventListener('click', () => openAuthModal());
+    if (!getToken()) {
+      mount.innerHTML = `
+        <div class="dashboard-loggedout">
+          <div class="gauge is-empty" role="img" aria-label="Progress not tracked">
+            <svg viewBox="0 0 120 120"><circle class="gauge-track" cx="60" cy="60" r="${GAUGE_R}"></circle></svg>
+            <div class="gauge-center"><span class="gauge-pct">—</span><span class="gauge-label">Not tracked</span></div>
+          </div>
+          <div class="dashboard-loggedout-body">
+            <p class="dashboard-loggedout-text">Log in to track your progress across every device and pick up right where you left off.</p>
+            <button type="button" class="dashboard-cta" id="dashboardLoginBtn">Log in to start tracking</button>
+          </div>
+        </div>`;
+      const loginBtn = document.getElementById('dashboardLoginBtn');
+      if (loginBtn) loginBtn.addEventListener('click', () => openAuthModal());
       return;
     }
+
+    if (!progressCache) {
+      mount.innerHTML = `
+        <div class="dashboard-inner">
+          <div class="gauge is-loading"><svg viewBox="0 0 120 120"><circle class="gauge-track" cx="60" cy="60" r="${GAUGE_R}"></circle></svg><div class="gauge-center"><span class="gauge-pct">···</span></div></div>
+          <div class="dashboard-stats"><p class="dashboard-loading-text">Loading your progress…</p></div>
+        </div>`;
+    }
+
     const progress = await getProgress();
     const done = COURSE.filter((l) => progress[l.id]).length;
-    const pct = Math.round((done / COURSE.length) * 100);
-    if (bar) bar.style.width = pct + '%';
-    if (text) text.textContent = `${done} of ${COURSE.length} lectures reviewed`;
+    const total = COURSE.length;
+    const pct = Math.round((done / total) * 100);
+    const offset = GAUGE_CIRCUMFERENCE * (1 - pct / 100);
+
+    const sessionRows = [1, 2, 3].map((s) => {
+      const inSession = COURSE.filter((l) => l.session === s);
+      const doneInSession = inSession.filter((l) => progress[l.id]).length;
+      const sPct = Math.round((doneInSession / inSession.length) * 100);
+      return `
+        <div class="session-stat">
+          <span>Session ${s}</span>
+          <div class="progress-bar"><div class="progress-bar-fill" style="width:${sPct}%"></div></div>
+          <span class="session-stat-count">${doneInSession}/${inSession.length}</span>
+        </div>`;
+    }).join('');
+
+    const next = COURSE.find((l) => !progress[l.id]);
+    let ctaHref, ctaText;
+    if (!next) {
+      ctaHref = COURSE[0].href;
+      ctaText = '🎉 Course complete — review again';
+    } else if (done === 0) {
+      ctaHref = COURSE[0].href;
+      ctaText = 'Start Week 1 →';
+    } else {
+      ctaHref = next.href;
+      ctaText = `Continue: Week ${next.week} →`;
+    }
+
+    mount.innerHTML = `
+      <div class="dashboard-inner">
+        <div class="gauge" role="img" aria-label="${pct} percent of the course reviewed">
+          <svg viewBox="0 0 120 120">
+            <circle class="gauge-track" cx="60" cy="60" r="${GAUGE_R}"></circle>
+            <circle class="gauge-fill" cx="60" cy="60" r="${GAUGE_R}" style="stroke-dasharray:${GAUGE_CIRCUMFERENCE.toFixed(2)};stroke-dashoffset:${offset.toFixed(2)};"></circle>
+          </svg>
+          <div class="gauge-center"><span class="gauge-pct">${pct}%</span><span class="gauge-label">${done} of ${total}</span></div>
+        </div>
+        <div class="dashboard-stats">
+          <div class="dashboard-sessions">${sessionRows}</div>
+          <a class="dashboard-cta" href="${ctaHref}">${ctaText}</a>
+        </div>
+      </div>`;
   }
 
   window.SITE = {
@@ -509,7 +610,7 @@
     initTopicModals,
     initProgressToggle,
     renderCourseGrid,
-    initProgressSummary,
-    renderLectureFooter
+    renderLectureFooter,
+    renderProgressDashboard
   };
 })();
