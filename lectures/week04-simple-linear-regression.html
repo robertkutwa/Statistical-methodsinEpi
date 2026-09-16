@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for simple linear regression.">
+  <title>Simple Linear Regression | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 2 · Week 4</div>
+      <h1>Simple Linear Regression</h1>
+      <div class="subtitle">One predictor, least squares, and the assumptions every later model — including MLR — builds on.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#model">Model & least squares</a><a href="#interpretation">Interpreting coefficients</a><a href="#inference">Inference on the slope</a><a href="#correlation">Correlation vs. regression</a><a href="#assumptions">Assumptions preview</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Simple linear regression (SLR) models a continuous outcome as a straight-line function of one predictor. Its least-squares fitting method, coefficient interpretation, and assumptions are the direct foundation for multiple linear regression (Week 6) and, with a different link function, logistic regression (Week 7).</p>
+        <div class="grid"><div class="mini"><strong>Fit</strong>Least squares finds the line minimizing squared prediction errors.</div><div class="mini"><strong>Interpret</strong>The slope is the average change in Y per unit change in X.</div><div class="mini"><strong>Assume</strong>Linearity, independence, normal errors, and constant variance — checked in Week 6.</div></div>
+      </section>
+
+      <section class="topic searchable" id="model"><div class="topic-head"><div class="number">A</div><h2>The model & least squares</h2></div>
+        <p>The simple linear regression model expresses $Y$ as a linear function of $X$ plus random error.</p>
+        <div class="formula">$$Y = \beta_0 + \beta_1 X + \varepsilon$$</div>
+        <p>Least squares chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to minimize the sum of squared residuals, $\sum (y_i - \hat{y}_i)^2$, where $\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$.</p>
+        <div class="formula">$$\hat{\beta}_1 = \frac{\sum (x_i-\bar{x})(y_i-\bar{y})}{\sum (x_i-\bar{x})^2}, \qquad \hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x}$$</div>
+      </section>
+
+      <section class="topic searchable" id="interpretation"><div class="topic-head"><div class="number">B</div><h2>Interpreting coefficients & R²</h2></div>
+        <div class="grid"><div class="mini"><strong>$\hat{\beta}_1$ (slope)</strong>Average change in $Y$ for a one-unit increase in $X$.</div><div class="mini"><strong>$\hat{\beta}_0$ (intercept)</strong>Predicted $Y$ when $X=0$ — only meaningful if $X=0$ is in or near the observed data range.</div><div class="mini"><strong>$R^2$</strong>Proportion of variance in $Y$ explained by $X$, from 0 to 1.</div></div>
+        <div class="callout"><strong>$R^2$ is not a measure of whether the model is "correct."</strong> A high $R^2$ can coexist with a badly misspecified model (e.g., real curvature fit with a straight line); always check residual plots too.</div>
+      </section>
+
+      <section class="topic searchable" id="inference"><div class="topic-head"><div class="number">C</div><h2>Inference on the slope</h2></div>
+        <p>Testing $H_0: \beta_1 = 0$ (no linear relationship) uses the same t-test logic from Week 3.</p>
+        <div class="formula">$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}, \qquad df = n-2$$</div>
+        <p>A confidence interval for $\beta_1$ follows the same $\hat{\beta}_1 \pm t^{*}\cdot SE(\hat{\beta}_1)$ pattern as any other estimate. Degrees of freedom are $n-2$ because two parameters ($\beta_0,\beta_1$) were estimated from the data.</p>
+      </section>
+
+      <section class="topic searchable" id="correlation"><div class="topic-head"><div class="number">D</div><h2>Correlation vs. regression</h2></div>
+        <p>Pearson's correlation coefficient $r$ measures the strength and direction of a <strong>linear</strong> association, symmetric in $X$ and $Y$. Regression, by contrast, models $Y$ as a function <em>of</em> $X$ and is not symmetric — regressing $Y$ on $X$ gives a different line than regressing $X$ on $Y$.</p>
+        <div class="formula">$$R^2 = r^2 \quad \text{(in simple linear regression only)}$$</div>
+        <div class="callout"><strong>Correlation does not imply causation</strong>, and neither does regression by itself — a strong, statistically significant slope only supports causal interpretation alongside appropriate study design and control for confounding.</div>
+      </section>
+
+      <section class="topic searchable" id="assumptions"><div class="topic-head"><div class="number">E</div><h2>Assumptions preview</h2></div>
+        <p>Ordinary least squares relies on four assumptions about the errors $\varepsilon$, commonly remembered as <strong>LINE</strong>.</p>
+        <div class="grid"><div class="mini"><strong>Linearity</strong>The true relationship between $X$ and $Y$ is a straight line.</div><div class="mini"><strong>Independence</strong>Errors are uncorrelated across observations.</div><div class="mini"><strong>Normality</strong>Errors are normally distributed (mainly matters for small-sample inference).</div><div class="mini"><strong>Equal variance</strong>Error variance is constant across the range of $X$ (homoskedasticity).</div></div>
+        <div class="callout"><strong>This is exactly where Week 6 picks up:</strong> non-linearity, non-normal errors, heteroskedasticity, and (in multiple regression) multicollinearity are each named and diagnosed there.</div>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Extrapolating beyond the data range</td><td>The fitted line is only justified where data were observed.</td><td>Restrict predictions to the observed range of $X$, or flag extrapolation explicitly.</td></tr><tr><td>Interpreting $\beta_0$ when $X=0$ is meaningless</td><td>Many predictors (e.g., age, blood pressure) never take the value 0 in practice.</td><td>Center $X$ at a meaningful value before fitting if the intercept needs interpretation.</td></tr><tr><td>Assuming high $R^2$ means a valid model</td><td>$R^2$ only measures linear fit, not whether assumptions hold.</td><td>Always inspect residual plots (Week 6), not $R^2$ alone.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>Least squares minimizes $\sum(y_i-\hat{y}_i)^2$; the slope has a closed-form solution based on covariance and variance of $X$.</li><li>The slope is a rate of change; the intercept is only meaningful if $X=0$ is plausible.</li><li>$R^2$ measures explained variance, not correctness of the model form.</li><li>Testing $\beta_1=0$ uses a t-test with $n-2$ degrees of freedom.</li><li>LINE — Linearity, Independence, Normality, Equal variance — are the four core assumptions, diagnosed in Week 6.</li></ul><h3>Formula sheet</h3><div class="formula">$$\hat{\beta}_1 = \frac{\sum(x_i-\bar{x})(y_i-\bar{y})}{\sum(x_i-\bar{x})^2} \qquad t=\frac{\hat{\beta}_1}{SE(\hat{\beta}_1)} \qquad R^2=r^2$$</div><h3>Likely exam question</h3><div class="callout"><em>A regression of blood pressure on age gives $R^2=0.62$ and a significant slope. Does this prove age causes higher blood pressure? What else would you want to check?</em><br><br>Answer with: association ≠ causation; check residual plots for LINE violations, consider confounders, and note that observational data alone cannot establish causality regardless of $R^2$.</div><h3>Mnemonic</h3><p><strong>LINE</strong>: Linearity, Independence, Normality, Equal variance — the four assumptions this course diagnoses one by one in Week 6.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Model & least squares</summary><ol><li>Why does least squares minimize <em>squared</em> error rather than absolute error?</li></ol></details>
+        <details><summary>Interpreting coefficients</summary><ol><li>How should the slope be interpreted when $X$ is itself a transformed variable (e.g., log-scaled)?</li></ol></details>
+        <details><summary>Inference on the slope</summary><ol><li>Why are the degrees of freedom $n-2$ rather than $n-1$?</li></ol></details>
+        <details><summary>Correlation vs. regression</summary><ol><li>Why does regressing $Y$ on $X$ give a different line than regressing $X$ on $Y$, even though $r$ is the same either way?</li></ol></details>
+        <details><summary>Assumptions preview</summary><ol><li>Which LINE assumption, if violated, is most damaging to hypothesis tests versus to point estimates?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 4 · Simple Linear Regression.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'model': { kicker:'Topic A', title:'The model & least squares', body:'<p>Simple linear regression assumes the average value of $Y$ changes linearly with $X$: $E[Y\\mid X] = \\beta_0 + \\beta_1 X$. Individual observations deviate from this line by a random error term $\\varepsilon$.</p><div class="definition"><strong>Least squares criterion:</strong> among all possible lines, choose the intercept and slope that minimize the sum of squared vertical distances between observed points and the fitted line, $\\sum(y_i-\\hat{y}_i)^2$.</div><h3>Why squared error?</h3><p>Squaring makes the objective differentiable everywhere (enabling a closed-form solution), penalizes large errors more than small ones, and treats positive and negative residuals symmetrically. The resulting formulas depend only on means, variances, and the covariance between $X$ and $Y$.</p><h3>Closed-form solution</h3><p>$\\hat{\\beta}_1$ equals the sample covariance of $X$ and $Y$ divided by the sample variance of $X$; $\\hat{\\beta}_0$ is chosen so the fitted line passes through the point $(\\bar{x},\\bar{y})$. This means the regression line always passes through the means of both variables.</p><div class="caution"><strong>Least squares is sensitive to outliers</strong> in exactly the way Week 6\\'s leverage and influence diagnostics address — a single extreme point can pull the whole line toward it.</div>' },
+      'interpretation': { kicker:'Topic B', title:'Interpreting coefficients & R²', body:'<p>Correctly reading a fitted regression equation is as important as fitting it correctly.</p><div class="definition"><strong>Slope ($\\hat{\\beta}_1$):</strong> the model\\'s estimate of how much $Y$ changes, on average, for each one-unit increase in $X$. This is an association from the fitted model, not automatically a causal effect.</div><div class="definition"><strong>Intercept ($\\hat{\\beta}_0$):</strong> the predicted value of $Y$ when $X=0$. Meaningful only when $X=0$ falls within or near the range of observed data; otherwise it is a mathematical artifact of extending the line.</div><div class="definition"><strong>$R^2$:</strong> the proportion of total variability in $Y$ explained by the linear relationship with $X$, ranging from 0 (no linear explanatory power) to 1 (points fall exactly on the line).</div><h3>What $R^2$ does not tell you</h3><ul><li>It does not indicate whether the relationship is truly linear — a curved relationship can still produce a moderate $R^2$ from a straight-line fit.</li><li>It does not indicate whether coefficients are unbiased or whether assumptions hold.</li><li>It is not comparable across datasets with different amounts of inherent variability.</li></ul><div class="caution"><strong>Centering $X$</strong> (subtracting its mean before fitting) changes the intercept\\'s meaning to "predicted $Y$ at the average $X$," which is almost always more interpretable, without changing the slope.</div>' },
+      'inference': { kicker:'Topic C', title:'Inference on the slope', body:'<p>Fitting a line gives a point estimate of the slope; inference asks whether that estimated relationship is distinguishable from no relationship at all.</p><div class="definition"><strong>Hypotheses:</strong> $H_0: \\beta_1=0$ (no linear association between $X$ and $Y$) versus $H_A: \\beta_1 \\neq 0$.</div><div class="definition"><strong>Test statistic:</strong> $t = \\hat{\\beta}_1 / SE(\\hat{\\beta}_1)$, compared against a t-distribution with $n-2$ degrees of freedom.</div><h3>Why $n-2$ degrees of freedom?</h3><p>Two parameters — the intercept and the slope — were estimated from the data before residuals could be calculated, so two degrees of freedom are "used up," leaving $n-2$ for estimating the error variance. This generalizes directly: multiple regression with $p$ predictors plus an intercept uses $n-p-1$ degrees of freedom.</p><h3>Confidence interval for the slope</h3><p>$\\hat{\\beta}_1 \\pm t^{*}_{n-2}\\cdot SE(\\hat{\\beta}_1)$ gives a range of plausible values for the true slope, following exactly the same logic as the confidence intervals built in Week 3.</p><div class="caution"><strong>A significant slope does not guarantee a useful model</strong> — with a large enough sample, even a tiny, practically unimportant slope can be statistically significant. Report the slope\\'s magnitude and CI, not just its p-value.</div>' },
+      'correlation': { kicker:'Topic D', title:'Correlation vs. regression', body:'<p>Correlation and regression both describe linear relationships but answer different questions and are not interchangeable.</p><div class="definition"><strong>Pearson correlation ($r$):</strong> a symmetric measure, between $-1$ and $1$, of how tightly two variables move together linearly. Swapping which variable is "X" and which is "Y" does not change $r$.</div><div class="definition"><strong>Regression:</strong> models one variable ($Y$) as a function of another ($X$), and is inherently asymmetric — regressing $Y$ on $X$ produces a different line than regressing $X$ on $Y$, except in the special case where both variables have equal variance.</div><h3>The $R^2 = r^2$ relationship</h3><p>In simple linear regression specifically, the model\\'s $R^2$ equals the square of the Pearson correlation between $X$ and $Y$. This equivalence breaks down once multiple predictors are involved (Week 6), where $R^2$ reflects the combined explanatory power of all predictors together.</p><h3>Neither implies causation</h3><p>A strong correlation or a significant regression slope both describe an observed association. Establishing causation additionally requires appropriate study design (e.g., randomization), ruling out confounding and reverse causation, and — ideally — a plausible causal mechanism.</p><div class="caution"><strong>Restriction of range</strong> — studying only a narrow slice of $X$\\'s natural range — can shrink an observed correlation even when the underlying relationship, across the full range, is strong.</div>' },
+      'assumptions': { kicker:'Topic E', title:'Assumptions preview (LINE)', body:'<p>Ordinary least squares gives the best (minimum-variance) unbiased estimates only when its underlying assumptions hold. These four are worth memorizing as a set because Week 6 diagnoses each one in turn, now extended to multiple predictors.</p><div class="definition"><strong>Linearity:</strong> the true relationship between the predictors and $E[Y]$ is linear in the parameters. Violated by real curvature; addressed with polynomial terms (Week 6, Topic B).</div><div class="definition"><strong>Independence:</strong> residuals are uncorrelated with each other. Commonly violated by repeated measures, clustered data, or time-series autocorrelation.</div><div class="definition"><strong>Normality:</strong> the errors are normally distributed. Matters most for the validity of t-tests, F-tests, and CIs in small samples; less critical in large samples thanks to the CLT (Week 2).</div><div class="definition"><strong>Equal variance (homoskedasticity):</strong> the spread of the errors is constant across the range of fitted values. Violated by heteroskedasticity (Week 6, Topic D).</div><h3>Why LINE matters before you even fit multiple predictors</h3><p>Every diagnostic technique in Week 6 — residual plots, the Breusch–Pagan test, Cook\\'s distance — exists to check one of these four assumptions. Understanding LINE here means Week 6 becomes "how do I check these four things," not four unrelated new ideas.</p><div class="caution"><strong>Assumptions are about the errors $\\varepsilon$, not about $X$ or $Y$ individually</strong> — a skewed $X$ or $Y$ does not by itself violate any LINE assumption.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week04');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week04', undefined, () => SITE.renderLectureFooter('week04'));
+    SITE.renderLectureFooter('week04');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>

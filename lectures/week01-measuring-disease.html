@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for measures of disease frequency and association in epidemiology.">
+  <title>Measuring Disease in Populations | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 1 · Week 1</div>
+      <h1>Measuring Disease in Populations</h1>
+      <div class="subtitle">Incidence, prevalence, association, standardization, and screening — the vocabulary every later model is built on.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#frequency">Counts & rates</a><a href="#incidence-prevalence">Incidence vs. prevalence</a><a href="#association">Association measures</a><a href="#standardization">Standardization</a><a href="#screening">Screening tests</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Epidemiology starts with counting: <strong>how many</strong> people are affected, <strong>how fast</strong> new cases appear, and <strong>how much more likely</strong> an exposed group is to be affected than an unexposed one. Five ideas carry the rest of the course: frequency measures, incidence vs. prevalence, measures of association, standardization, and screening test accuracy.</p>
+        <div class="grid"><div class="mini"><strong>Count</strong>Proportions, ratios, and rates turn raw counts into comparable numbers.</div><div class="mini"><strong>Compare</strong>Risk ratios, rate ratios, and odds ratios compare exposed and unexposed groups.</div><div class="mini"><strong>Adjust</strong>Standardization removes the distorting effect of age or other confounders.</div></div>
+      </section>
+
+      <section class="topic searchable" id="frequency"><div class="topic-head"><div class="number">A</div><h2>Counts, proportions, and rates</h2></div>
+        <p>A <strong>proportion</strong> is a count divided by a population total; it is dimensionless and bounded between 0 and 1. A <strong>ratio</strong> compares two quantities that need not be part of a whole. A <strong>rate</strong> adds a time dimension — it measures how fast events accumulate per unit of person-time.</p>
+        <h3>Why the distinction matters</h3><ul><li>Proportions answer "what fraction is affected right now."</li><li>Rates answer "how quickly are new cases occurring."</li><li>Confusing a rate with a proportion is a common source of misinterpreted epidemiologic claims.</li></ul>
+      </section>
+
+      <section class="topic searchable" id="incidence-prevalence"><div class="topic-head"><div class="number">B</div><h2>Incidence vs. prevalence</h2></div>
+        <p><strong>Cumulative incidence</strong> is the proportion of an at-risk population that develops disease over a fixed period. <strong>Incidence rate</strong> divides new cases by total person-time at risk, accommodating varying follow-up lengths. <strong>Prevalence</strong> is the proportion of a population that has the disease at a point (or period) in time, regardless of when it started.</p>
+        <div class="formula">$$\text{Prevalence} \approx \text{Incidence rate} \times \text{Average duration of disease}$$</div>
+        <div class="callout"><strong>Key relationship:</strong> this approximation holds when prevalence is low and disease frequency is roughly stable over time (steady state).</div>
+      </section>
+
+      <section class="topic searchable" id="association"><div class="topic-head"><div class="number">C</div><h2>Measures of association</h2></div>
+        <p>These compare disease occurrence between an exposed and an unexposed group.</p>
+        <div class="grid"><div class="mini"><strong>Risk ratio</strong>Cumulative incidence, exposed ÷ unexposed. Interpreted directly as relative risk.</div><div class="mini"><strong>Rate ratio</strong>Incidence rate, exposed ÷ unexposed. Used with person-time data.</div><div class="mini"><strong>Odds ratio</strong>Odds of disease, exposed ÷ unexposed. Approximates the risk ratio when disease is rare.</div></div>
+        <h3>Absolute vs. relative</h3><p><strong>Risk difference</strong> (exposed risk minus unexposed risk) tells you the absolute burden attributable to exposure; risk ratios and odds ratios tell you the relative strength of association. Both are needed — a large relative risk on a rare outcome may still mean a small absolute difference.</p>
+      </section>
+
+      <section class="topic searchable" id="standardization"><div class="topic-head"><div class="number">D</div><h2>Standardization</h2></div>
+        <p>Crude rates can differ between two populations simply because their age structures differ, not because underlying risk differs. Standardization removes that distortion.</p>
+        <h3>Direct standardization</h3><p>Apply each population's age-specific rates to a single, shared standard population, then compare the resulting adjusted rates.</p>
+        <h3>Indirect standardization</h3><p>Apply the standard population's age-specific rates to each study population's age structure to get an expected count, then compare it with the observed count via the <strong>standardized morbidity/mortality ratio (SMR)</strong>.</p>
+        <div class="formula">$$SMR = \frac{\text{Observed cases}}{\text{Expected cases}}$$</div>
+        <div class="callout"><strong>When to use which:</strong> direct standardization needs age-specific rates for every study population; indirect standardization is preferred when those are unstable (e.g., small strata) but a reliable standard population's rates are available.</div>
+      </section>
+
+      <section class="topic searchable" id="screening"><div class="topic-head"><div class="number">E</div><h2>Screening test accuracy</h2></div>
+        <p>A screening test is judged against a gold-standard diagnosis using a 2×2 table of test result by true disease status.</p>
+        <div class="grid"><div class="mini"><strong>Sensitivity</strong>P(test positive | disease). How well the test catches true cases.</div><div class="mini"><strong>Specificity</strong>P(test negative | no disease). How well the test clears true non-cases.</div><div class="mini"><strong>PPV</strong>P(disease | test positive). Depends on disease prevalence.</div><div class="mini"><strong>NPV</strong>P(no disease | test negative). Also prevalence-dependent.</div></div>
+        <div class="callout"><strong>Sensitivity/specificity are properties of the test; PPV/NPV are properties of the test <em>in a population</em>.</strong> The same test has different predictive values in a high- versus low-prevalence setting.</div>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Treating prevalence as a rate</td><td>Both are proportions of "affected," but prevalence carries no time dimension.</td><td>Reserve "rate" language for incidence measures with person-time denominators.</td></tr><tr><td>Comparing crude rates across populations</td><td>Different age structures create apparent differences unrelated to true risk.</td><td>Use direct or indirect standardization before comparing.</td></tr><tr><td>Quoting PPV as if it were fixed</td><td>PPV shifts with prevalence even when sensitivity and specificity stay constant.</td><td>Always state the prevalence a PPV/NPV was computed at.</td></tr><tr><td>Interpreting OR as RR in a common outcome</td><td>The rare-disease approximation breaks down once risk exceeds roughly 10%.</td><td>Report risk ratios directly when using a cohort design and the outcome is common.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>Cumulative incidence is a proportion over a fixed period; incidence rate uses person-time; prevalence is a snapshot.</li><li>Prevalence ≈ incidence rate × average duration, under steady state.</li><li>Risk ratio, rate ratio, and odds ratio each compare exposed vs. unexposed, but on different scales.</li><li>Direct standardization applies each population's rates to a shared standard; indirect compares observed to expected via SMR.</li><li>Sensitivity/specificity are test properties; PPV/NPV also depend on prevalence.</li></ul><h3>Formula sheet</h3><div class="formula">$$\text{Prevalence} \approx \text{Incidence rate} \times \text{Duration} \qquad SMR = \frac{\text{Observed}}{\text{Expected}}$$</div><h3>Likely exam question</h3><div class="callout"><em>A screening test has 90% sensitivity and 95% specificity. Explain why its PPV would be much lower in a low-prevalence population than a high-prevalence one, without changing the test itself.</em><br><br>Answer with: PPV depends on both test accuracy and the prior probability of disease (prevalence); in a low-prevalence group, false positives from the large pool of non-diseased people outnumber true positives even at high specificity.</div><h3>Mnemonic</h3><p><strong>SnNout</strong>: a highly <strong>S</strong>e<strong>n</strong>sitive test, when <strong>N</strong>egative, rules <strong>out</strong> disease. <strong>SpPin</strong>: a highly <strong>Sp</strong>ecific test, when <strong>P</strong>ositive, rules <strong>in</strong> disease.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Counts, proportions, and rates</summary><ol><li>When is a proportion an acceptable substitute for a rate?</li><li>How is person-time calculated when follow-up lengths vary widely?</li></ol></details>
+        <details><summary>Incidence vs. prevalence</summary><ol><li>Under what conditions does the prevalence ≈ incidence × duration approximation break down?</li><li>How does a sudden treatment breakthrough that shortens disease duration affect prevalence?</li></ol></details>
+        <details><summary>Measures of association</summary><ol><li>Why does the odds ratio diverge from the risk ratio as baseline risk rises?</li><li>When is a risk difference more decision-relevant than a risk ratio?</li></ol></details>
+        <details><summary>Standardization</summary><ol><li>What happens if the standard population's age distribution is itself unusual?</li><li>Can standardization correct for confounders other than age?</li></ol></details>
+        <details><summary>Screening</summary><ol><li>How would you communicate PPV to a patient in plain language?</li><li>What trade-off does raising a test's cutoff create between sensitivity and specificity?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 1 · Measuring Disease in Populations.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'frequency': { kicker:'Topic A', title:'Counts, proportions, and rates', body:'<p>Every epidemiologic measure starts as a count, but raw counts cannot be compared across populations of different sizes. Converting to proportions, ratios, or rates makes comparison possible.</p><div class="definition"><strong>Proportion:</strong> numerator is a subset of the denominator (e.g., cases divided by population). Always between 0 and 1, unitless.</div><div class="definition"><strong>Ratio:</strong> numerator need not be part of the denominator (e.g., male cases to female cases). No inherent bound.</div><div class="definition"><strong>Rate:</strong> a proportion-like quantity with an explicit time dimension in the denominator, typically person-time.</div><h3>Person-time</h3><p>Person-time sums each individual\\'s time actually at risk, which lets studies combine people who entered, left, or developed the outcome at different times into one denominator. Someone followed for 3 years contributes 3 person-years; someone followed for 6 months contributes 0.5.</p><div class="caution"><strong>Common error:</strong> reporting a rate per person rather than per unit of person-time makes it impossible to compare studies with different follow-up lengths.</div>' },
+      'incidence-prevalence': { kicker:'Topic B', title:'Incidence vs. prevalence', body:'<p>Incidence describes <em>new</em> occurrence; prevalence describes the <em>existing burden</em> at a point or period in time. They answer different clinical and policy questions.</p><div class="definition"><strong>Cumulative incidence:</strong> (new cases during a period) ÷ (population at risk at the start), assuming no important losses to follow-up. It is a probability of developing disease over that period.</div><div class="definition"><strong>Incidence rate:</strong> (new cases) ÷ (total person-time at risk). It has units of 1/time and can exceed what a proportion could represent because the denominator is time, not people.</div><div class="definition"><strong>Prevalence:</strong> (existing cases at a point in time) ÷ (population at that time). A period prevalence extends this over an interval.</div><h3>The steady-state relationship</h3><p>When incidence and average disease duration are roughly stable, $Prevalence \\approx Incidence\\ rate \\times Duration$. This is why a disease can have low incidence but high prevalence if it is chronic (e.g., diabetes), or high incidence but low prevalence if it resolves quickly (e.g., a common cold).</p><h3>What changes each</h3><ul><li>New treatments that cure disease faster reduce prevalence without necessarily changing incidence.</li><li>Better diagnosis can raise apparent incidence without a true change in disease occurrence.</li><li>Migration of prevalent cases into a population raises prevalence without new incidence.</li></ul><div class="caution"><strong>Prevalence is a poor measure of disease risk</strong> because it mixes how often disease starts with how long it lasts. Use incidence when the research question is about causation or risk.</div>' },
+      'association': { kicker:'Topic C', title:'Measures of association', body:'<p>An association measure compares disease occurrence between exposure groups, on either a relative or an absolute scale.</p><div class="definition"><strong>Risk ratio (RR):</strong> cumulative incidence in the exposed divided by cumulative incidence in the unexposed. RR = 1 means no association; RR &gt; 1 suggests harm; RR &lt; 1 suggests protection.</div><div class="definition"><strong>Rate ratio:</strong> the same logic applied to incidence rates instead of cumulative incidence, appropriate when follow-up time varies.</div><div class="definition"><strong>Odds ratio (OR):</strong> odds of disease in the exposed divided by odds of disease in the unexposed. It is the natural association measure from case-control studies, where cumulative incidence cannot be directly calculated.</div><h3>Rare disease approximation</h3><p>When the outcome is uncommon (roughly under 10%), odds and risk are numerically close, so OR approximates RR reasonably well. As baseline risk rises, the odds ratio moves further from the risk ratio, always exaggerating the effect size in the direction away from 1.</p><h3>Absolute measures</h3><p>Risk difference (exposed risk minus unexposed risk) and its inverse, the number needed to treat or harm, translate relative measures into a scale relevant for individual and policy decisions. A relative risk of 2 means very different things if baseline risk is 50% (huge absolute impact) versus 0.1% (tiny absolute impact).</p><div class="caution"><strong>Always report both a relative and an absolute measure</strong> when possible — each tells a story the other cannot.</div>' },
+      'standardization': { kicker:'Topic D', title:'Standardization', body:'<p>Comparing crude rates between two populations is only valid if their underlying structure (usually age) is similar. Standardization creates a fair comparison by holding that structure constant.</p><div class="definition"><strong>Direct standardization:</strong> take each population\\'s own age-specific rates and apply them to one common standard population\\'s age distribution. The result is an "as if" rate — what the rate would be if each population had the standard\\'s age structure.</div><div class="definition"><strong>Indirect standardization:</strong> take the standard population\\'s age-specific rates and apply them to each study population\\'s own age distribution, producing an expected number of cases. Compare that expected count to the number actually observed.</div><div class="formula">$$SMR = \\frac{\\text{Observed cases}}{\\text{Expected cases}}$$</div><h3>Choosing a method</h3><p>Direct standardization is preferred when every study population has stable, reliable age-specific rates. Indirect standardization is preferred when individual strata are small or unstable (common in occupational or small-area studies), because it borrows strength from the standard population\\'s more stable rates.</p><h3>Interpreting SMR</h3><p>An SMR of 1.3 means 30% more cases were observed than would be expected if this population had experienced the standard population\\'s age-specific rates. SMRs from different study populations are <strong>not</strong> directly comparable to each other, because each was standardized against the same external reference but using its own (different) age structure as the weight.</p><div class="caution"><strong>Standardization corrects for the factor you standardized on</strong> (usually age) — it does not correct for other confounders like smoking or socioeconomic status unless you stratify on those too.</div>' },
+      'screening': { kicker:'Topic E', title:'Screening test accuracy', body:'<p>Every screening or diagnostic test is evaluated against a gold-standard diagnosis, organized into a 2×2 table: test result (positive/negative) by true disease status (present/absent).</p><div class="definition"><strong>Sensitivity:</strong> P(test positive | disease present) = true positives ÷ (true positives + false negatives). Describes how well the test detects real cases.</div><div class="definition"><strong>Specificity:</strong> P(test negative | disease absent) = true negatives ÷ (true negatives + false positives). Describes how well the test clears real non-cases.</div><div class="definition"><strong>Positive predictive value (PPV):</strong> P(disease present | test positive). What a positive result actually means for this patient.</div><div class="definition"><strong>Negative predictive value (NPV):</strong> P(disease absent | test negative).</div><h3>Why PPV and NPV move with prevalence</h3><p>Sensitivity and specificity are intrinsic properties of the test (conditioned on true disease status). PPV and NPV are conditioned on the <em>test result</em>, so by Bayes\\' theorem they depend on the prior probability of disease — prevalence — even when sensitivity and specificity stay fixed. In a low-prevalence population, most positives are false positives even for a good test.</p><h3>Choosing cutoffs</h3><p>Moving a test\\'s decision threshold trades sensitivity against specificity. A Receiver Operating Characteristic (ROC) curve plots this trade-off across all thresholds; its area under the curve (AUC) summarizes overall discriminative ability.</p><div class="caution"><strong>A "highly accurate" test can still perform poorly at the population level</strong> if disease is rare — always ask what prevalence a reported PPV assumes.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week01');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week01', undefined, () => SITE.renderLectureFooter('week01'));
+    SITE.renderLectureFooter('week01');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+
+</html>

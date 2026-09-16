@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for estimation, confidence intervals, and hypothesis testing.">
+  <title>Estimation & Hypothesis Testing | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 2 · Week 3</div>
+      <h1>Estimation, Confidence Intervals & Hypothesis Testing</h1>
+      <div class="subtitle">Turning a sample statistic into a defensible claim about the population it came from.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#estimation">Point estimation</a><a href="#ci">Confidence intervals</a><a href="#testing">Hypothesis testing</a><a href="#errors">Type I/II error & power</a><a href="#ttests">t-tests</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Inference moves from a single sample to a claim about the population. This week covers point and interval estimation, the logic of hypothesis testing, the two ways a test can be wrong, and the t-test as a first worked example — the direct precursor to regression inference in Weeks 4 and 6.</p>
+        <div class="grid"><div class="mini"><strong>Estimate</strong>A point estimate plus its uncertainty (standard error).</div><div class="mini"><strong>Interval</strong>A confidence interval expresses a plausible range for the true parameter.</div><div class="mini"><strong>Test</strong>A hypothesis test asks whether the data are surprising under a null claim.</div></div>
+      </section>
+
+      <section class="topic searchable" id="estimation"><div class="topic-head"><div class="number">A</div><h2>Point estimation</h2></div>
+        <p>A point estimate is a single best guess for a population parameter, calculated from sample data (e.g., $\bar{x}$ estimates $\mu$). Two properties judge how good an estimator is.</p>
+        <div class="grid"><div class="mini"><strong>Bias</strong>Does the estimator's average value across repeated samples equal the true parameter?</div><div class="mini"><strong>Precision</strong>How much does the estimator vary from sample to sample (its standard error)?</div></div>
+        <div class="callout"><strong>An ideal estimator is unbiased and precise.</strong> A biased-but-precise estimator is consistently wrong; an unbiased-but-imprecise one is right on average but unreliable in any single study.</div>
+      </section>
+
+      <section class="topic searchable" id="ci"><div class="topic-head"><div class="number">B</div><h2>Confidence intervals</h2></div>
+        <p>A confidence interval (CI) pairs a point estimate with a margin of error built from the standard error.</p>
+        <div class="formula">$$\bar{x} \pm z^{*}\cdot SE(\bar{x})$$</div>
+        <p>For a 95% CI, $z^{*}\approx 1.96$. <strong>Correct interpretation:</strong> if we repeated the sampling process many times, about 95% of the intervals constructed this way would contain the true population parameter. It is <em>not</em> a 95% probability that this particular interval contains the truth.</p>
+        <h3>What widens or narrows a CI</h3><ul><li>Larger sample size → smaller SE → narrower CI.</li><li>Higher confidence level (e.g., 99% vs. 95%) → larger $z^{*}$ → wider CI.</li><li>More variable data (larger $\sigma$) → wider CI.</li></ul>
+      </section>
+
+      <section class="topic searchable" id="testing"><div class="topic-head"><div class="number">C</div><h2>Hypothesis testing framework</h2></div>
+        <p>A hypothesis test asks: if the null hypothesis were true, how unusual would data like ours be?</p>
+        <ol><li>State $H_0$ (no effect/no difference) and $H_A$ (the effect exists).</li><li>Choose a significance level $\alpha$ (typically 0.05).</li><li>Compute a test statistic that measures how far the data are from $H_0$.</li><li>Convert the test statistic to a p-value.</li><li>Reject $H_0$ if $p < \alpha$; otherwise, fail to reject $H_0$.</li></ol>
+        <div class="callout"><strong>A p-value is P(data this extreme or more extreme | $H_0$ is true)</strong> — it is not the probability that $H_0$ is true, and "fail to reject" is not the same as "proven true."</div>
+      </section>
+
+      <section class="topic searchable" id="errors"><div class="topic-head"><div class="number">D</div><h2>Type I/II error & power</h2></div>
+        <div class="grid"><div class="mini"><strong>Type I error (α)</strong>Rejecting $H_0$ when it is actually true — a false positive.</div><div class="mini"><strong>Type II error (β)</strong>Failing to reject $H_0$ when it is actually false — a false negative.</div><div class="mini"><strong>Power (1−β)</strong>The probability of correctly detecting a true effect.</div></div>
+        <h3>What increases power</h3><ul><li>Larger sample size.</li><li>Larger true effect size.</li><li>Less variable data.</li><li>A less stringent $\alpha$ (trades more Type I error risk for more power).</li></ul>
+      </section>
+
+      <section class="topic searchable" id="ttests"><div class="topic-head"><div class="number">E</div><h2>One- and two-sample t-tests</h2></div>
+        <p>The t-test compares a sample mean to a fixed value (one-sample) or two sample means to each other (two-sample), using the t-distribution to account for estimating $\sigma$ from the sample.</p>
+        <div class="formula">$$t = \frac{\bar{x}_1 - \bar{x}_2}{SE(\bar{x}_1 - \bar{x}_2)}$$</div>
+        <p>The t-distribution has heavier tails than the normal, especially at small degrees of freedom (roughly $n-1$ or $n_1+n_2-2$), which corrects for the extra uncertainty of estimating the standard deviation rather than knowing it. As $n$ grows, the t-distribution converges to the normal — the same t-statistic logic reappears when testing regression coefficients in Weeks 4 and 6.</p>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>"95% probability the true value is in this interval"</td><td>The frequentist CI is a property of the procedure, not of a single realized interval.</td><td>State it as: 95% of intervals built this way would capture the true parameter.</td></tr><tr><td>Treating p ≥ 0.05 as "no effect"</td><td>Failing to reject $H_0$ can reflect low power, not truth of $H_0$.</td><td>Report the CI and consider power/sample size before concluding "no effect."</td></tr><tr><td>Multiple testing without adjustment</td><td>Each test carries its own Type I error risk; running many inflates the overall false-positive rate.</td><td>Pre-specify comparisons or adjust (e.g., Bonferroni), as revisited in Week 5's ANOVA post-hoc tests.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>A CI combines a point estimate with $z^{*}$ (or $t^{*}$) times the standard error.</li><li>A p-value is the probability of data this extreme <em>given $H_0$ is true</em>, not the probability $H_0$ is true.</li><li>Type I error (α) is a false positive; Type II error (β) is a false negative; power is $1-\beta$.</li><li>Power rises with larger n, larger effect size, less variability, and a looser α.</li><li>The t-distribution replaces the normal when $\sigma$ is estimated from the sample, especially at small n.</li></ul><h3>Formula sheet</h3><div class="formula">$$CI = \bar{x} \pm z^{*}\cdot SE \qquad t = \frac{\bar{x}_1-\bar{x}_2}{SE(\bar{x}_1-\bar{x}_2)}$$</div><h3>Likely exam question</h3><div class="callout"><em>A study finds p = 0.08 for a plausible, clinically meaningful effect. Is this good evidence of "no effect"? What would you want to know before concluding that?</em><br><br>Answer with: p ≥ 0.05 does not prove $H_0$; check the CI's width and the study's power — a small, underpowered study can easily miss a real effect.</div><h3>Mnemonic</h3><p><strong>Type I</strong> = false alarm (reject a true $H_0$); <strong>Type II</strong> = missed detection (fail to reject a false $H_0$); <strong>Power</strong> = your ability to catch a real effect.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Point estimation</summary><ol><li>Can an estimator be biased but still preferred over an unbiased alternative?</li></ol></details>
+        <details><summary>Confidence intervals</summary><ol><li>How would a Bayesian credible interval's interpretation differ from a frequentist CI's?</li></ol></details>
+        <details><summary>Hypothesis testing</summary><ol><li>Why is $\alpha=0.05$ the conventional cutoff, and when might a stricter or looser value be justified?</li></ol></details>
+        <details><summary>Type I/II error & power</summary><ol><li>How is a target power (e.g., 80%) used to plan sample size before a study begins?</li><li>What is the practical trade-off between lowering α and maintaining power?</li></ol></details>
+        <details><summary>t-tests</summary><ol><li>When should a paired t-test replace a two-sample t-test?</li><li>What happens to the t-test's validity if the equal-variance assumption is violated?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 3 · Estimation, Confidence Intervals & Hypothesis Testing.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'estimation': { kicker:'Topic A', title:'Point estimation', body:'<p>A point estimate collapses a sample into a single number meant to represent an unknown population parameter — the sample mean $\\bar{x}$ for the population mean $\\mu$, the sample proportion $\\hat{p}$ for the population proportion $p$, and so on.</p><div class="definition"><strong>Bias:</strong> the difference between the expected value of the estimator (averaged over all possible samples) and the true parameter. An unbiased estimator has $E[\\hat{\\theta}] = \\theta$.</div><div class="definition"><strong>Precision:</strong> how tightly the estimator clusters around its own average value across repeated samples, quantified by its standard error. Higher precision means a smaller SE.</div><h3>Bias-variance trade-off</h3><p>Some estimators deliberately accept a small amount of bias in exchange for a large reduction in variance, producing lower total error on average. This idea reappears later in the course whenever a "shrinkage" or regularized estimator is discussed as an alternative to ordinary least squares under severe multicollinearity (Week 6).</p><h3>Sample size and precision</h3><p>Because standard error typically shrinks as $1/\\sqrt{n}$ (Week 2), precision improves with sample size, but bias does not automatically improve — a systematically flawed sampling design stays biased no matter how large the sample gets.</p><div class="caution"><strong>More data fixes imprecision, not bias.</strong> If your sampling frame excludes part of the target population, collecting more of the same biased sample will not correct the problem.</div>' },
+      'ci': { kicker:'Topic B', title:'Confidence intervals', body:'<p>A confidence interval reports both an estimate and the uncertainty around it, which a point estimate alone cannot convey.</p><div class="definition"><strong>General form:</strong> $\\text{estimate} \\pm \\text{critical value} \\times SE$. The critical value ($z^{*}$ or $t^{*}$) depends on the desired confidence level and, for the t-distribution, the degrees of freedom.</div><h3>The correct interpretation</h3><p>Before data are collected, the procedure "compute $\\bar{x} \\pm 1.96\\,SE$" has a 95% probability of producing an interval that contains $\\mu$. After the data are in hand and the interval is calculated, that specific interval either contains $\\mu$ or it does not — there is no more randomness left to assign a probability to. The 95% describes the long-run performance of the method, not a given interval.</p><h3>Interpreting width</h3><p>A wide CI signals substantial uncertainty — often from a small sample or highly variable data — even if the point estimate looks impressive. Two studies can report the same point estimate with very different practical implications if their CIs differ drastically in width.</p><h3>CIs and hypothesis tests are linked</h3><p>A 95% CI that excludes the null value (e.g., a risk ratio of 1) corresponds to rejecting $H_0$ at $\\alpha=0.05$ in a two-sided test — the two tools are two views of the same underlying calculation.</p><div class="caution"><strong>A CI is not a prediction interval</strong> — it describes uncertainty about a population parameter, not the range where a single new observation is likely to fall.</div>' },
+      'testing': { kicker:'Topic C', title:'Hypothesis testing framework', body:'<p>Hypothesis testing formalizes the question "could chance alone plausibly explain what I observed, if there were truly no effect?"</p><div class="definition"><strong>Null hypothesis ($H_0$):</strong> the default claim of no effect, no difference, or no association — the position that must be disproven by the data.</div><div class="definition"><strong>Alternative hypothesis ($H_A$):</strong> the research claim of interest — that an effect, difference, or association exists.</div><div class="definition"><strong>p-value:</strong> the probability of observing a test statistic at least as extreme as the one calculated, <em>assuming $H_0$ is true</em>. A small p-value means the observed data would be unusual under $H_0$.</div><h3>The decision rule</h3><p>Comparing the p-value to a pre-chosen significance level $\\alpha$ gives a binary decision: reject $H_0$ if $p<\\alpha$, otherwise fail to reject. This dichotomy is a simplification — many statisticians now argue for reporting the p-value and CI together rather than a bare reject/fail-to-reject verdict.</p><h3>What a p-value is not</h3><ul><li>Not the probability that $H_0$ is true.</li><li>Not the probability that the result happened "by chance" in some vague sense.</li><li>Not a measure of effect size or clinical importance — a tiny, unimportant effect can still be statistically significant with enough data.</li></ul><div class="caution"><strong>Statistical significance ≠ practical significance.</strong> Always report an effect size (e.g., a risk difference or regression coefficient) alongside the p-value.</div>' },
+      'errors': { kicker:'Topic D', title:'Type I/II error & power', body:'<p>Every hypothesis test can go wrong in one of two ways, and reducing one type of error typically increases the other unless sample size changes.</p><div class="definition"><strong>Type I error (α):</strong> rejecting a true $H_0$ — concluding there is an effect when there truly is none. The significance level $\\alpha$ is chosen in advance as the maximum acceptable Type I error rate.</div><div class="definition"><strong>Type II error (β):</strong> failing to reject a false $H_0$ — missing a real effect. Unlike α, β is not fixed by the researcher; it depends on sample size, effect size, variability, and α itself.</div><div class="definition"><strong>Power ($1-\\beta$):</strong> the probability of correctly detecting a true effect of a given size. Studies are often designed to target 80% or 90% power.</div><h3>The four possible outcomes</h3><table><thead><tr><th></th><th>$H_0$ true</th><th>$H_0$ false</th></tr></thead><tbody><tr><td>Reject $H_0$</td><td>Type I error (α)</td><td>Correct (power)</td></tr><tr><td>Fail to reject $H_0$</td><td>Correct</td><td>Type II error (β)</td></tr></tbody></table><h3>Planning for power</h3><p>Before data collection, researchers use a target power, an assumed effect size, and an estimate of variability to calculate the minimum sample size needed. Underpowered studies risk a Type II error even when a real, meaningful effect exists — a key reason "no significant difference" is not the same as "no difference."</p><div class="caution"><strong>Lowering α to reduce false positives raises β</strong> (all else equal) — there is no free way to reduce both error types without collecting more data or increasing the effect size\\'s detectability.</div>' },
+      'ttests': { kicker:'Topic E', title:'One- and two-sample t-tests', body:'<p>The t-test is the simplest worked example of the general hypothesis-testing machinery from Topic C, and it previews the exact logic used to test regression coefficients later in the course.</p><div class="definition"><strong>One-sample t-test:</strong> compares a sample mean to a fixed hypothesized value $\\mu_0$: $t = (\\bar{x}-\\mu_0)/SE(\\bar{x})$.</div><div class="definition"><strong>Two-sample t-test:</strong> compares the means of two independent groups: $t = (\\bar{x}_1-\\bar{x}_2)/SE(\\bar{x}_1-\\bar{x}_2)$, where the standard error combines both groups\\' variability and sample sizes.</div><h3>Why the t-distribution, not the normal</h3><p>When $\\sigma$ is known exactly, the test statistic follows a normal distribution. In practice $\\sigma$ is almost always estimated from the sample as $s$, which adds extra uncertainty — the t-distribution has heavier tails to account for this, especially at small degrees of freedom. As sample size grows, the t-distribution converges to the standard normal.</p><h3>Assumptions</h3><ul><li>Observations are independent.</li><li>The underlying population is approximately normal, or the sample is large enough for the CLT (Week 2) to apply.</li><li>The two-sample test additionally assumes equal variances unless a Welch correction is used.</li></ul><h3>The regression connection</h3><p>Testing whether a regression slope equals zero (Week 4) uses exactly this t-statistic logic: $t = \\hat{\\beta}/SE(\\hat{\\beta})$. Understanding the t-test here makes every later coefficient test a direct application of the same idea.</p><div class="caution"><strong>A paired design needs a paired t-test</strong> (on the differences), not a two-sample t-test — treating paired data as independent groups understates the true precision of the comparison.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week03');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week03', undefined, () => SITE.renderLectureFooter('week03'));
+    SITE.renderLectureFooter('week03');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>

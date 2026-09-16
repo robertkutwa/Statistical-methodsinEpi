@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide hub for Statistical Methods in Epidemiology — eight weeks of lecture guides with worked examples and exam prep.">
+  <title>Statistical Methods in Epidemiology | Study Guides</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .home-intro { max-width:760px; }
+  </style>
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Statistical Methods in Epidemiology</div>
+      <h1>Course Study Guides</h1>
+      <div class="subtitle home-intro">Eight interactive lecture guides, from measuring disease frequency through survival analysis. Each guide has clickable topic deep-dives, a searchable table of contents, and an exam-prep summary.</div>
+      <div class="toolbar">
+        <button class="button" id="themeToggle">☾ Toggle theme</button>
+      </div>
+      <div class="progress-summary">
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressBarFill"></div></div>
+        <span class="progress-summary-text" id="progressSummaryText">0 of 8 lectures reviewed</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout" style="grid-template-columns:1fr;">
+    <main id="content">
+      <section class="intro">
+        <h2>How to use this guide</h2>
+        <p>Each week builds on the last: descriptive measures and probability (Session 1) set up estimation and simple regression (Session 2), which lead into multiple regression, logistic regression, and survival analysis (Session 3). Click any card below to open that week's guide, or mark it reviewed once you've worked through it — your progress is saved in this browser.</p>
+        <input class="search" id="search" type="search" placeholder="Filter lectures by topic…" aria-label="Filter lectures">
+      </section>
+      <div class="course-grid" id="courseGrid"></div>
+    </main>
+  </div>
+
+  <footer>Statistical Methods in Epidemiology · Study guide hub · Open any lecture in a modern browser.</footer>
+
+  <script src="script.js"></script>
+  <script>
+    SITE.initTheme();
+    SITE.initNav(null);
+    SITE.renderCourseGrid('courseGrid');
+    SITE.initProgressSummary();
+    SITE.initSearch('search', '.course-card');
+  </script>
+</body>
+</html>

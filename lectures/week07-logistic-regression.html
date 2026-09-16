@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for logistic regression for binary outcomes.">
+  <title>Logistic Regression | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 3 · Week 7</div>
+      <h1>Logistic Regression for Binary Outcomes</h1>
+      <div class="subtitle">Modeling odds, interpreting exponentiated coefficients, and checking model fit.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#why">Why not linear regression</a><a href="#odds">Odds ratios</a><a href="#mle">Estimation (MLE)</a><a href="#fit">Model fit</a><a href="#multiple">Multiple logistic regression</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Logistic regression extends the regression framework from Weeks 4 and 6 to binary outcomes (disease/no disease, event/no event). It swaps the linear link for a logit link, produces odds ratios instead of raw slopes, and is fit by maximum likelihood rather than least squares.</p>
+        <div class="grid"><div class="mini"><strong>Link</strong>The logit function maps probability (0,1) to the full real line.</div><div class="mini"><strong>Interpret</strong>Exponentiated coefficients are odds ratios.</div><div class="mini"><strong>Fit</strong>Maximum likelihood replaces least squares; fit is checked differently than in MLR.</div></div>
+      </section>
+
+      <section class="topic searchable" id="why"><div class="topic-head"><div class="number">A</div><h2>Why not linear regression for binary outcomes</h2></div>
+        <p>Fitting ordinary least squares directly to a 0/1 outcome (the "linear probability model") creates two structural problems.</p>
+        <ul><li>Predicted probabilities can fall below 0 or above 1, which is nonsensical.</li><li>The variance of a binary outcome depends on its own mean ($p(1-p)$), guaranteeing heteroskedasticity (Week 6) by construction.</li></ul>
+        <p>Logistic regression solves both by modeling the <strong>log-odds</strong> of the outcome as linear in the predictors, keeping predicted probabilities bounded between 0 and 1.</p>
+        <div class="formula">$$\text{logit}(p) = \ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 X_1 + \dots + \beta_k X_k$$</div>
+      </section>
+
+      <section class="topic searchable" id="odds"><div class="topic-head"><div class="number">B</div><h2>Odds ratios</h2></div>
+        <p>Exponentiating a logistic coefficient converts it from the log-odds scale to an odds ratio.</p>
+        <div class="formula">$$OR_j = e^{\beta_j}$$</div>
+        <p><strong>Interpretation:</strong> for a one-unit increase in $X_j$, holding other predictors constant, the odds of the outcome multiply by $e^{\beta_j}$. $OR=1$ means no association; $OR>1$ increased odds; $OR<1$ decreased odds.</p>
+        <div class="callout"><strong>Recall from Week 1:</strong> the odds ratio approximates the risk ratio only when the outcome is rare — for common outcomes, don't casually re-describe an OR as if it were an RR.</div>
+      </section>
+
+      <section class="topic searchable" id="mle"><div class="topic-head"><div class="number">C</div><h2>Estimation: maximum likelihood</h2></div>
+        <p>Logistic regression coefficients are fit by <strong>maximum likelihood estimation (MLE)</strong>, not least squares: choose the $\beta$ values that make the observed pattern of 0s and 1s most probable under the model.</p>
+        <p>Unlike OLS, there is no closed-form solution — coefficients are found by iterative numerical optimization (e.g., iteratively reweighted least squares). MLE estimates are asymptotically normal, which is why Wald tests and confidence intervals for logistic coefficients look structurally similar to the t-based ones from Weeks 3-4, but rely on large-sample approximation rather than exact small-sample theory.</p>
+      </section>
+
+      <section class="topic searchable" id="fit"><div class="topic-head"><div class="number">D</div><h2>Assessing model fit</h2></div>
+        <div class="grid"><div class="mini"><strong>Deviance</strong>−2 × log-likelihood; used to compare nested models via likelihood ratio tests.</div><div class="mini"><strong>Hosmer-Lemeshow test</strong>Compares observed vs. predicted event rates across risk deciles.</div><div class="mini"><strong>Pseudo-R²</strong>Several analogues to OLS $R^2$ (e.g., McFadden's); none is directly comparable across models the way OLS $R^2$ is.</div></div>
+        <div class="callout"><strong>There is no single "$R^2$" for logistic regression</strong> — model fit is usually judged with a combination of deviance-based tests, calibration checks, and discrimination measures like the AUC (Week 1's ROC curve idea, applied to the fitted model).</div>
+      </section>
+
+      <section class="topic searchable" id="multiple"><div class="topic-head"><div class="number">E</div><h2>Multiple logistic regression, confounding & interaction</h2></div>
+        <p>With multiple predictors, each exponentiated coefficient is an <strong>adjusted</strong> odds ratio — holding the other covariates constant. This is how logistic regression controls for confounding: including a confounder in the model adjusts the exposure's odds ratio for its effect.</p>
+        <h3>Interaction</h3><p>Adding a product term $X_1 \times X_2$ lets the effect of $X_1$ differ across levels of $X_2$ (effect modification). Its exponentiated coefficient is a <strong>ratio of odds ratios</strong>, not an odds ratio itself, and should be interpreted with that in mind.</p>
+        <div class="callout"><strong>Same diagnostics apply:</strong> multicollinearity (Week 6) is checked the same way via VIF; predictors should still be assessed for a linear relationship with the logit, not with the raw outcome.</div>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Reading OR as RR</td><td>Both express "how much more likely," but only agree for rare outcomes.</td><td>Report RR directly (from a cohort design) when the outcome is common; state OR explicitly otherwise.</td></tr><tr><td>Using OLS diagnostics unchanged</td><td>Residuals in logistic regression are not continuous/normal like OLS residuals.</td><td>Use deviance residuals and fit statistics designed for binary outcomes.</td></tr><tr><td>Complete/quasi-complete separation</td><td>A predictor perfectly (or near-perfectly) predicts the outcome, so MLE does not converge.</td><td>Check for the pattern; consider penalized (e.g., Firth) logistic regression.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>The logit link, $\ln(p/(1-p))$, keeps predicted probabilities between 0 and 1.</li><li>Exponentiated coefficients are odds ratios: $e^{\beta_j}$.</li><li>Logistic regression is fit by maximum likelihood, not least squares — no closed-form solution.</li><li>Model fit uses deviance, Hosmer-Lemeshow, and pseudo-$R^2$ — not OLS $R^2$.</li><li>Multiple predictors give adjusted odds ratios; interaction terms give ratios of odds ratios.</li></ul><h3>Formula sheet</h3><div class="formula">$$\text{logit}(p) = \ln\left(\frac{p}{1-p}\right) = \beta_0+\beta_1 X_1 \qquad OR = e^{\beta_1}$$</div><h3>Likely exam question</h3><div class="callout"><em>A logistic regression finds $\hat{\beta}_1 = 0.7$ for a binary exposure. Interpret this coefficient, and explain why it is not automatically a good estimate of the risk ratio.</em><br><br>Answer with: $OR = e^{0.7}\approx 2.01$ — the odds of the outcome roughly double with exposure; OR only approximates RR when the outcome is rare, so state the outcome's prevalence before equating the two.</div><h3>Mnemonic</h3><p><strong>Logit in, odds ratio out</strong>: fit on the log-odds scale, but always translate back to odds ratios (and report prevalence) for interpretation.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Why not linear regression</summary><ol><li>In what settings might a linear probability model still be used despite its limitations?</li></ol></details>
+        <details><summary>Odds ratios</summary><ol><li>How should a continuous predictor's odds ratio be reported — per unit, or per some clinically meaningful increment?</li></ol></details>
+        <details><summary>Maximum likelihood</summary><ol><li>What does it mean for MLE estimates to be "asymptotically" normal, and when might that approximation be poor?</li></ol></details>
+        <details><summary>Model fit</summary><ol><li>How does the Hosmer-Lemeshow test's reliance on arbitrary risk deciles affect its usefulness?</li></ol></details>
+        <details><summary>Multiple logistic regression</summary><ol><li>How would you decide whether an interaction term is warranted before fitting it?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 7 · Logistic Regression for Binary Outcomes.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'why': { kicker:'Topic A', title:'Why not linear regression for binary outcomes', body:'<p>A binary outcome coded 0/1 could, in principle, be fit with ordinary least squares — the "linear probability model" — but doing so breaks two of the LINE assumptions from Week 4 by construction.</p><div class="definition"><strong>Boundary violation:</strong> a straight line is unbounded, so for extreme values of the predictors, OLS will predict probabilities below 0 or above 1 — values that cannot correspond to any real probability.</div><div class="definition"><strong>Built-in heteroskedasticity:</strong> for a binary outcome, $Var(Y\\mid X) = p(X)(1-p(X))$, which necessarily changes as $p(X)$ changes across the range of $X$ — violating the equal-variance assumption for every linear probability model, regardless of the true relationship.</div><h3>The logit solution</h3><p>Instead of modeling $p$ directly, logistic regression models the log-odds, $\\ln(p/(1-p))$, as a linear function of the predictors. The logit function stretches the bounded (0,1) probability scale onto the entire real line, so no combination of predictor values can produce an impossible probability once transformed back.</p><h3>The logistic (sigmoid) curve</h3><p>Transforming the linear log-odds back to a probability produces an S-shaped curve that approaches, but never reaches, 0 or 1 — automatically respecting probability\\'s natural bounds.</p><div class="caution"><strong>A linear probability model is sometimes still used</strong> for its easy interpretability with common outcomes and large samples, but its coefficients should be checked against predicted probabilities to confirm they stay in [0,1] over the relevant predictor range.</div>' },
+      'odds': { kicker:'Topic B', title:'Odds ratios', body:'<p>Because logistic regression is fit on the log-odds scale, its coefficients are most naturally interpreted after exponentiating them back to odds ratios.</p><div class="definition"><strong>Odds:</strong> $p/(1-p)$, the ratio of the probability an event happens to the probability it does not. Odds and probability carry the same information but are numerically different — odds of 4 corresponds to a probability of 0.8, not 4.</div><div class="definition"><strong>Odds ratio:</strong> $OR_j = e^{\\beta_j}$, the multiplicative change in the odds of the outcome for a one-unit increase in $X_j$, holding all other model predictors fixed.</div><h3>Reading the direction</h3><p>$OR=1$ ($\\beta_j=0$) indicates no association. $OR>1$ indicates the predictor is associated with higher odds of the outcome; $OR<1$ indicates lower odds. Because the OR is a ratio, its scale is not symmetric around "no effect" — an OR of 2 and an OR of 0.5 represent equally strong associations in opposite directions.</p><h3>The rare-disease approximation revisited</h3><p>As established in Week 1, when the outcome is uncommon, odds ≈ probability, so the OR closely approximates the risk ratio. As baseline risk increases, the OR moves further from the RR — always overstating the relative effect in the direction away from 1. This matters directly here because logistic regression is often the only feasible way to estimate an OR from case-control data.</p><div class="caution"><strong>Report the outcome\\'s baseline prevalence alongside any OR</strong> intended to approximate a risk ratio, so readers can judge how close that approximation is likely to be.</div>' },
+      'mle': { kicker:'Topic C', title:'Estimation: maximum likelihood', body:'<p>Unlike simple and multiple linear regression, logistic regression coefficients cannot be solved for algebraically — they are found through maximum likelihood estimation (MLE), an iterative numerical procedure.</p><div class="definition"><strong>Likelihood:</strong> the probability of observing the actual pattern of outcomes (0s and 1s) in the data, as a function of the unknown coefficients $\\beta$. MLE searches for the $\\beta$ values that make this probability as large as possible.</div><h3>Why no closed form?</h3><p>The logistic (sigmoid) function that converts log-odds back to probability is nonlinear, so the equations that define the maximum of the likelihood function cannot be solved directly. Software instead uses iterative algorithms — commonly iteratively reweighted least squares (IRLS) — that repeatedly refine an estimate of $\\beta$ until it converges.</p><h3>Large-sample properties</h3><p>MLE estimates are consistent (they converge to the true value as $n\\to\\infty$) and asymptotically normal, which is what justifies building Wald confidence intervals and z-tests for logistic coefficients in a way that looks structurally similar to the t-based inference in Weeks 3-4. The key difference is that this normality is a large-sample approximation, not an exact small-sample result the way OLS inference can be under normal errors.</p><div class="caution"><strong>MLE can fail to converge</strong> when a predictor perfectly separates the outcome (complete separation) or with very small samples relative to the number of predictors — watch for implausibly large coefficients or standard errors as a symptom.</div>' },
+      'fit': { kicker:'Topic D', title:'Assessing model fit', body:'<p>Because logistic regression is not fit by minimizing squared error, the familiar OLS $R^2$ has no direct analogue, and model fit is instead assessed through several complementary tools.</p><div class="definition"><strong>Deviance:</strong> $-2$ times the log-likelihood of the fitted model. Comparing the deviance of two nested models via a likelihood ratio test plays the same role that the F-test for nested models plays in linear regression.</div><div class="definition"><strong>Hosmer-Lemeshow test:</strong> groups observations into risk deciles based on predicted probability, then compares observed versus expected event counts within each group using a chi-square-style statistic (Week 5). A non-significant result suggests reasonable calibration.</div><div class="definition"><strong>Pseudo-$R^2$:</strong> several proposed analogues (McFadden\\'s, Cox & Snell\\'s, Nagelkerke\\'s) that summarize improvement over an intercept-only model on a roughly 0-to-1 scale, but none has OLS $R^2$\\'s clean "proportion of variance explained" interpretation.</div><h3>Discrimination vs. calibration</h3><p>Discrimination — how well the model separates cases from non-cases — is commonly summarized with the AUC from an ROC curve (Week 1). Calibration — whether predicted probabilities match observed frequencies — is what Hosmer-Lemeshow and calibration plots assess. A model can discriminate well while being poorly calibrated, or vice versa; both should be checked.</p><div class="caution"><strong>A significant Hosmer-Lemeshow test does not identify which part of the model is miscalibrated</strong> — treat it as a flag for further investigation, not a diagnosis.</div>' },
+      'multiple': { kicker:'Topic E', title:'Multiple logistic regression, confounding & interaction', body:'<p>Most real applications use multiple predictors at once, which lets logistic regression adjust for confounding the same way multiple linear regression does.</p><div class="definition"><strong>Adjusted odds ratio:</strong> in a multiple logistic regression, $e^{\\beta_j}$ represents the odds ratio for a one-unit change in $X_j$ <em>holding all other predictors in the model constant</em>. Adding a confounder to the model and re-examining the exposure\\'s OR is the standard way to check whether an apparent association is explained by that confounder.</div><h3>Interaction (effect modification)</h3><p>Adding a product term $X_1\\times X_2$ allows the association between $X_1$ and the outcome to depend on the level of $X_2$. The exponentiated coefficient on the interaction term is a <strong>ratio of odds ratios</strong> — how many times larger (or smaller) $X_1$\\'s odds ratio is at one level of $X_2$ compared with another — not an odds ratio on its own.</p><h3>Shared diagnostics with MLR</h3><p>Multicollinearity among predictors is still checked with VIF (Week 6), computed from the predictors\\' linear relationships to each other exactly as in OLS. Predictors should also be checked for a linear relationship with the <em>logit</em> of the outcome (e.g., via the Box-Tidwell test), the logistic-regression analogue of checking linearity against a continuous outcome in Week 4.</p><div class="caution"><strong>Confounding and interaction are different phenomena</strong> — a confounder changes the exposure\\'s estimated effect when added to the model; an effect modifier changes how strong that effect is across subgroups. Confusing the two leads to misinterpreting adjusted odds ratios.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week07');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week07', undefined, () => SITE.renderLectureFooter('week07'));
+    SITE.renderLectureFooter('week07');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>

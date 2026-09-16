@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for probability rules and sampling distributions in epidemiologic data.">
+  <title>Probability & Sampling Distributions | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 1 · Week 2</div>
+      <h1>Probability & Sampling Distributions</h1>
+      <div class="subtitle">From the rules of probability to the Central Limit Theorem that makes statistical inference possible.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#rules">Probability rules</a><a href="#discrete">Discrete distributions</a><a href="#normal">The normal distribution</a><a href="#sampling">Sampling distributions</a><a href="#clt">Central Limit Theorem</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Statistical inference rests on probability. This week covers the basic rules of probability, the discrete and continuous distributions that model epidemiologic outcomes, and the Central Limit Theorem — the result that lets us use normal-based methods even when individual data are not normally distributed.</p>
+        <div class="grid"><div class="mini"><strong>Model</strong>Binomial and Poisson distributions describe counts of events.</div><div class="mini"><strong>Standardize</strong>The normal distribution and z-scores let us compare across scales.</div><div class="mini"><strong>Generalize</strong>The CLT justifies using normal theory for sample means and proportions.</div></div>
+      </section>
+
+      <section class="topic searchable" id="rules"><div class="topic-head"><div class="number">A</div><h2>Probability rules</h2></div>
+        <p>Probability quantifies uncertainty on a 0-to-1 scale. Three rules do most of the work in epidemiologic reasoning.</p>
+        <div class="formula">$$P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B)$$</div>
+        <div class="formula">$$P(A \text{ and } B) = P(A)\,P(B \mid A)$$</div>
+        <div class="formula">$$P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)} \quad \text{(Bayes' theorem)}$$</div>
+        <p><strong>Independence:</strong> events $A$ and $B$ are independent when $P(A \mid B) = P(A)$ — knowing $B$ occurred tells you nothing about $A$. Bayes' theorem is the formal engine behind PPV and NPV from Week 1.</p>
+      </section>
+
+      <section class="topic searchable" id="discrete"><div class="topic-head"><div class="number">B</div><h2>Discrete distributions</h2></div>
+        <p>Two distributions cover most epidemiologic count data.</p>
+        <h3>Binomial</h3><p>Models the number of "successes" in $n$ independent trials, each with success probability $p$ (e.g., number of diseased individuals in a fixed sample).</p>
+        <div class="formula">$$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}, \qquad E[X]=np, \quad Var(X)=np(1-p)$$</div>
+        <h3>Poisson</h3><p>Models rare, independent events over a fixed interval of time or space (e.g., disease cases per person-year), governed by a single rate parameter $\lambda$.</p>
+        <div class="formula">$$P(X=k) = \frac{e^{-\lambda}\lambda^k}{k!}, \qquad E[X]=Var(X)=\lambda$$</div>
+        <div class="callout"><strong>Rule of thumb:</strong> when $n$ is large and $p$ is small, the binomial is well approximated by a Poisson with $\lambda = np$ — this is why incidence counts of rare diseases are typically modeled as Poisson.</div>
+      </section>
+
+      <section class="topic searchable" id="normal"><div class="topic-head"><div class="number">C</div><h2>The normal distribution</h2></div>
+        <p>The normal (Gaussian) distribution is the symmetric, bell-shaped continuous distribution defined by its mean $\mu$ and standard deviation $\sigma$. Converting to a z-score standardizes any normal variable for comparison.</p>
+        <div class="formula">$$z = \frac{x - \mu}{\sigma}$$</div>
+        <p>A z-score expresses how many standard deviations $x$ is from the mean. About 68% of values fall within 1 SD, 95% within roughly 1.96 SD, and 99.7% within 3 SD of the mean — the basis for 95% confidence intervals in Week 3.</p>
+      </section>
+
+      <section class="topic searchable" id="sampling"><div class="topic-head"><div class="number">D</div><h2>Sampling distributions</h2></div>
+        <p>A <strong>sampling distribution</strong> is the distribution of a statistic (e.g., a sample mean) across all possible samples of a given size from a population. Its spread is measured by the <strong>standard error</strong>, not the standard deviation of individual observations.</p>
+        <div class="formula">$$SE(\bar{x}) = \frac{\sigma}{\sqrt{n}}$$</div>
+        <div class="callout"><strong>Standard deviation vs. standard error:</strong> SD describes variability between individuals; SE describes variability of a summary statistic (like a mean) across repeated samples, and it shrinks as $n$ grows.</div>
+      </section>
+
+      <section class="topic searchable" id="clt"><div class="topic-head"><div class="number">E</div><h2>Central Limit Theorem</h2></div>
+        <p>The Central Limit Theorem (CLT) states that the sampling distribution of the sample mean approaches a normal distribution as $n$ grows, <strong>regardless of the shape of the underlying population distribution</strong>, provided the population has finite variance.</p>
+        <h3>Why it matters</h3><ul><li>It justifies using normal-theory confidence intervals and hypothesis tests even for skewed raw data, once $n$ is reasonably large.</li><li>It explains why Week 1's rare-event Poisson counts, when averaged over enough person-time, can still be analyzed with normal-based methods.</li><li>Small samples from skewed populations are where the CLT approximation is weakest — this is exactly the setting where transformations (Week 6) matter most.</li></ul>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Confusing SD with SE</td><td>Both use the same Greek letters and units.</td><td>Ask whether the question concerns individuals (SD) or a summary statistic (SE).</td></tr><tr><td>Assuming independence without checking</td><td>Clustered data (e.g., repeated measures, matched pairs) violate the independence assumption behind binomial/Poisson models.</td><td>Identify the sampling unit and check whether observations within a unit are correlated.</td></tr><tr><td>Treating the CLT as guaranteeing normality at any n</td><td>"Large enough" depends on how skewed the population is.</td><td>Check residual/data shape at small or moderate n rather than assuming normality.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>$P(A \text{ or } B) = P(A)+P(B)-P(A \text{ and } B)$; Bayes' theorem links $P(A\mid B)$ to $P(B\mid A)$.</li><li>Binomial models a fixed number of trials; Poisson models rare events over time/space, with $E[X]=Var(X)=\lambda$.</li><li>A z-score standardizes a normal variable: $z=(x-\mu)/\sigma$.</li><li>Standard error is standard deviation divided by $\sqrt{n}$; it describes a statistic, not an individual.</li><li>The Central Limit Theorem lets sample means be treated as approximately normal for large $n$, regardless of the population's shape.</li></ul><h3>Formula sheet</h3><div class="formula">$$P(X=k)_{Binomial} = \binom{n}{k}p^k(1-p)^{n-k} \qquad P(X=k)_{Poisson} = \frac{e^{-\lambda}\lambda^k}{k!} \qquad SE(\bar{x})=\frac{\sigma}{\sqrt{n}}$$</div><h3>Likely exam question</h3><div class="callout"><em>Why can incidence counts of a rare disease be modeled with a Poisson distribution, and why does averaging many such counts still allow normal-based confidence intervals?</em><br><br>Answer with: rare, independent events over person-time → Poisson approximation to the binomial; CLT → sampling distribution of the rate approaches normal as accumulated person-time grows.</div><h3>Mnemonic</h3><p><strong>Binomial</strong> counts successes in fixed trials; <strong>Poisson</strong> counts rare events over an interval; the <strong>CLT</strong> turns "any shape" into "approximately normal," given enough n.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Probability rules</summary><ol><li>How does conditional independence differ from marginal independence?</li><li>Can Bayes' theorem be applied with more than two competing hypotheses?</li></ol></details>
+        <details><summary>Discrete distributions</summary><ol><li>What is the practical cutoff for "n large, p small" when approximating binomial by Poisson?</li><li>How would overdispersion (variance exceeding the mean) be detected in count data?</li></ol></details>
+        <details><summary>Normal distribution</summary><ol><li>How is a z-score different from a studentized residual introduced in Week 6?</li></ol></details>
+        <details><summary>Sampling distributions</summary><ol><li>Why does increasing sample size shrink the standard error but not the standard deviation?</li></ol></details>
+        <details><summary>Central Limit Theorem</summary><ol><li>How skewed can a population be before the CLT approximation becomes unreliable at typical class sample sizes?</li><li>Does the CLT apply to sample proportions the same way it applies to sample means?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 2 · Probability & Sampling Distributions.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'rules': { kicker:'Topic A', title:'Probability rules', body:'<p>Three rules underlie almost every probability calculation used in epidemiology.</p><div class="definition"><strong>Addition rule:</strong> $P(A \\text{ or } B) = P(A) + P(B) - P(A \\text{ and } B)$. Subtracting the overlap avoids double-counting when events can occur together.</div><div class="definition"><strong>Multiplication rule:</strong> $P(A \\text{ and } B) = P(A)P(B\\mid A)$. When $A$ and $B$ are independent, $P(B\\mid A)=P(B)$, simplifying to $P(A)P(B)$.</div><div class="definition"><strong>Bayes\\' theorem:</strong> $P(A\\mid B) = \\dfrac{P(B\\mid A)P(A)}{P(B)}$. It reverses the direction of a conditional probability, which is exactly what converts sensitivity/specificity (conditioned on true disease status) into PPV/NPV (conditioned on test result).</div><h3>Independence vs. mutual exclusivity</h3><p>These are often confused. Independent events can co-occur; mutually exclusive events cannot both occur, and are therefore <em>not</em> independent unless one has probability zero. Confusing the two leads to incorrect addition or multiplication of probabilities.</p><div class="caution"><strong>Conditional probability is not symmetric:</strong> $P(A\\mid B) \\neq P(B\\mid A)$ in general — this is precisely why sensitivity and PPV are different numbers.</div>' },
+      'discrete': { kicker:'Topic B', title:'Discrete distributions', body:'<p>Discrete distributions model outcomes that take countable values — 0, 1, 2, ... cases — rather than any value on a continuum.</p><div class="definition"><strong>Binomial:</strong> counts successes across a fixed number of independent, identically distributed trials, each with the same success probability $p$. Appropriate for a fixed cohort followed for a fixed period with a binary outcome.</div><div class="definition"><strong>Poisson:</strong> counts events occurring independently over a continuous interval of time, area, or person-time, governed by a single rate $\\lambda$. Appropriate for incidence counts, especially of rare outcomes.</div><h3>Mean and variance</h3><p>The binomial has $E[X]=np$ and $Var(X)=np(1-p)$; note variance is always less than the mean (except at $p=0$ or $1$). The Poisson has the distinctive property $E[X]=Var(X)=\\lambda$ — mean equals variance exactly.</p><h3>When the Poisson approximates the binomial</h3><p>As $n\\to\\infty$ and $p\\to 0$ with $np=\\lambda$ held roughly constant, the binomial distribution converges to a Poisson($\\lambda$). This is the formal justification for modeling rare-disease case counts as Poisson even though, strictly, each individual\\'s disease status is a binomial (Bernoulli) outcome.</p><div class="caution"><strong>Overdispersion:</strong> real count data sometimes have variance exceeding the mean, violating the Poisson\\'s equal mean-variance property. This signals unmodeled heterogeneity and may call for a negative binomial model instead.</div>' },
+      'normal': { kicker:'Topic C', title:'The normal distribution', body:'<p>The normal distribution is fully described by two parameters — its mean $\\mu$ (center) and standard deviation $\\sigma$ (spread) — and is symmetric around $\\mu$.</p><div class="definition"><strong>z-score:</strong> $z = (x-\\mu)/\\sigma$, the number of standard deviations $x$ lies from the mean. Converting to z-scores puts variables measured on different scales onto a common footing.</div><h3>The empirical rule</h3><p>Approximately 68% of a normal distribution\\'s mass lies within $\\pm1\\sigma$ of the mean, 95% within roughly $\\pm1.96\\sigma$, and 99.7% within $\\pm3\\sigma$. The 1.96 figure reappears directly in the 95% confidence interval formula covered in Week 3.</p><h3>Why the normal distribution is central</h3><p>Many biological measurements are approximately normal on their own, and — critically — the Central Limit Theorem (Topic E) shows that sample means are approximately normal even when individual measurements are not. This is why normal-theory methods (t-tests, CIs, regression inference) are used so broadly.</p><div class="caution"><strong>Not every bell-shaped distribution is normal</strong> — check skew and tail behavior (e.g., with a normal probability plot, as in Week 6) rather than assuming normality from shape alone.</div>' },
+      'sampling': { kicker:'Topic D', title:'Sampling distributions', body:'<p>A sampling distribution describes how a statistic — not an individual observation — would vary if you repeated the same study over and over with new random samples of the same size.</p><div class="definition"><strong>Standard error (SE):</strong> the standard deviation of a sampling distribution. For a sample mean, $SE(\\bar{x}) = \\sigma/\\sqrt{n}$, where $\\sigma$ is the population standard deviation of individual observations.</div><h3>SD vs. SE</h3><p>Standard deviation describes how spread out individual data points are; it does not shrink as sample size grows. Standard error describes how spread out a summary statistic (like a sample mean or proportion) would be across repeated samples; it shrinks as $1/\\sqrt{n}$, because averaging over more observations cancels out more noise.</p><h3>Why this matters for inference</h3><p>Confidence intervals and test statistics are built from standard errors, not standard deviations, because we are making claims about a summary statistic\\'s precision, not about individual variability. Quadrupling the sample size only halves the standard error — precision gains slow down as $n$ grows.</p><div class="caution"><strong>A small SE does not mean the estimate is unbiased</strong> — precision (small SE) and accuracy (little bias) are separate properties, both needed for a trustworthy estimate.</div>' },
+      'clt': { kicker:'Topic E', title:'Central Limit Theorem', body:'<p>The Central Limit Theorem is the theoretical bridge between messy, real-world data and the normal-based methods used throughout this course.</p><div class="definition"><strong>Statement:</strong> for a population with finite mean $\\mu$ and variance $\\sigma^2$, the sampling distribution of the sample mean $\\bar{x}$ approaches a Normal$(\\mu, \\sigma^2/n)$ distribution as $n$ increases, regardless of the shape of the original population distribution.</div><h3>What "regardless of shape" buys you</h3><p>Individual measurements can be skewed, bimodal, or otherwise non-normal, and the CLT still guarantees that their <em>sample mean</em> becomes approximately normal once $n$ is large enough. This is why t-tests and normal-theory confidence intervals remain valid tools for many real datasets that are not themselves normally distributed.</p><h3>How large is "large enough"?</h3><p>There is no universal cutoff. Highly skewed or heavy-tailed populations need larger $n$ before the approximation is trustworthy; roughly symmetric populations need much less. This is precisely the judgment call behind Week 6\\'s guidance: for non-normal errors, "large n" may let the CLT rescue a hypothesis test even without transforming the outcome.</p><h3>Practical implication</h3><p>The CLT justifies inference about <em>means</em> and <em>proportions</em> using normal theory. It does not, by itself, guarantee that individual predictions or residuals are normal — those are separate diagnostic questions, covered directly in Week 6.</p><div class="caution"><strong>The CLT is about the sampling distribution of a statistic, not about the data becoming more normal.</strong> The raw data keep whatever shape they started with.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week02');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week02', undefined, () => SITE.renderLectureFooter('week02'));
+    SITE.renderLectureFooter('week02');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>

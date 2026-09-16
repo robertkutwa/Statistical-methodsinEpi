@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for survival analysis: censoring, Kaplan-Meier, log-rank test, and Cox regression.">
+  <title>Survival Analysis | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 3 · Week 8</div>
+      <h1>Survival Analysis</h1>
+      <div class="subtitle">Time-to-event data, censoring, Kaplan-Meier curves, and the Cox proportional hazards model.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#censoring">Time-to-event & censoring</a><a href="#km">Kaplan-Meier</a><a href="#logrank">Log-rank test</a><a href="#cox">Cox proportional hazards</a><a href="#ph">Checking proportional hazards</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>Survival analysis handles outcomes that are not just "did it happen" but "when did it happen" — while properly accounting for participants who leave a study or end follow-up before the event occurs. It closes the course by combining ideas from every prior week: distributions (Week 2), group comparison (Week 5), and regression-style modeling (Weeks 4, 6, 7).</p>
+        <div class="grid"><div class="mini"><strong>Handle</strong>Censoring lets incomplete follow-up still contribute information.</div><div class="mini"><strong>Describe</strong>Kaplan-Meier curves estimate survival probability over time.</div><div class="mini"><strong>Model</strong>Cox regression estimates hazard ratios while adjusting for covariates.</div></div>
+      </section>
+
+      <section class="topic searchable" id="censoring"><div class="topic-head"><div class="number">A</div><h2>Time-to-event data & censoring</h2></div>
+        <p>Survival data record both an outcome (event occurred or not) and the time until that outcome or the end of observation.</p>
+        <div class="definition"><strong>Right censoring</strong> occurs when follow-up ends (study ends, participant withdraws, lost to follow-up) before the event is observed — all that is known is the event happened <em>after</em> the censoring time.</div>
+        <div class="callout"><strong>Censored observations are not discarded.</strong> They still contribute the information "this person survived at least this long," which is why survival methods differ from simply excluding incomplete cases.</div>
+        <p><strong>Non-informative censoring</strong> — the assumption that the reason for censoring is unrelated to the risk of the event — underlies every method in this topic. Informative censoring (e.g., sicker patients dropping out) biases all downstream estimates.</p>
+      </section>
+
+      <section class="topic searchable" id="km"><div class="topic-head"><div class="number">B</div><h2>The Kaplan-Meier estimator</h2></div>
+        <p>The Kaplan-Meier (KM) estimator is a non-parametric estimate of the survival function $S(t) = P(\text{event has not occurred by time } t)$, built by multiplying conditional survival probabilities at each observed event time.</p>
+        <div class="formula">$$\hat{S}(t) = \prod_{t_i \le t} \left(1 - \frac{d_i}{n_i}\right)$$</div>
+        <p>At each event time $t_i$, $d_i$ is the number of events and $n_i$ is the number still at risk. The result is a step function that drops at each event time and is flat between events (including through censoring times, which reduce $n_i$ without causing a drop).</p>
+      </section>
+
+      <section class="topic searchable" id="logrank"><div class="topic-head"><div class="number">C</div><h2>The log-rank test</h2></div>
+        <p>The log-rank test compares Kaplan-Meier curves between two or more groups, testing $H_0$: the underlying survival functions are identical, by comparing observed vs. expected events at each event time — conceptually similar to the chi-square logic from Week 5, but accumulated across every distinct event time in the data.</p>
+        <div class="callout"><strong>The log-rank test does not adjust for covariates</strong> — it is a simple group comparison, playing the same role for survival curves that a chi-square test plays for a single contingency table.</div>
+      </section>
+
+      <section class="topic searchable" id="cox"><div class="topic-head"><div class="number">D</div><h2>Cox proportional hazards model</h2></div>
+        <p>The Cox model relates covariates to the <strong>hazard</strong> — the instantaneous risk of the event at time $t$, given survival up to that point — without requiring a specific distributional form for survival time itself.</p>
+        <div class="formula">$$h(t \mid X) = h_0(t)\,e^{\beta_1 X_1 + \dots + \beta_k X_k}$$</div>
+        <p>$h_0(t)$, the baseline hazard, is left unspecified (semi-parametric), while the covariate effects are estimated as hazard ratios, exactly analogous to odds ratios in logistic regression.</p>
+        <div class="formula">$$HR_j = e^{\beta_j}$$</div>
+        <p><strong>Interpretation:</strong> a one-unit increase in $X_j$ multiplies the hazard by $e^{\beta_j}$, holding other covariates constant. $HR=1$: no effect; $HR>1$: increased hazard (worse); $HR<1$: decreased hazard (protective).</p>
+      </section>
+
+      <section class="topic searchable" id="ph"><div class="topic-head"><div class="number">E</div><h2>Checking the proportional hazards assumption</h2></div>
+        <p>The Cox model assumes the <strong>ratio</strong> of hazards between any two covariate levels stays constant over time — the survival curves' relative gap doesn't change shape, even if it changes in absolute terms.</p>
+        <h3>Checking it</h3><ul><li><strong>Schoenfeld residuals:</strong> should show no systematic trend over time if the assumption holds.</li><li><strong>Log(-log(survival)) plots:</strong> should be roughly parallel across groups.</li><li><strong>Time-interaction terms:</strong> a significant covariate × time interaction signals a violated assumption.</li></ul>
+        <div class="callout"><strong>If violated:</strong> stratify by the offending covariate, add a time-varying coefficient, or split follow-up into time periods with separate hazard ratios — this is the survival-analysis analogue of Week 6's remedies for a violated MLR assumption.</div>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Dropping censored observations</td><td>Looks like "incomplete data," but censoring is informative about minimum survival time.</td><td>Keep censored cases in the risk set until their censoring time; use KM/Cox methods designed for this.</td></tr><tr><td>Assuming censoring is always non-informative</td><td>Convenient default assumption, but not always justified.</td><td>Consider why follow-up ended; sensitivity-check if dropout may relate to prognosis.</td></tr><tr><td>Reporting a hazard ratio as if it were a risk ratio</td><td>Both are "ratio" measures of relative effect, but on different scales (instantaneous risk vs. cumulative risk).</td><td>State clearly that the HR compares instantaneous hazard, not cumulative probability of the event.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>Right censoring means the event's timing is only known to be after the censoring time; censored cases still contribute information.</li><li>Kaplan-Meier estimates $S(t)$ as a product of conditional survival probabilities at each event time.</li><li>The log-rank test compares KM curves between groups but does not adjust for covariates.</li><li>The Cox model estimates hazard ratios, $e^{\beta_j}$, without specifying the baseline hazard's shape.</li><li>The proportional hazards assumption — constant hazard ratio over time — should be checked (e.g., Schoenfeld residuals) before trusting a Cox model.</li></ul><h3>Formula sheet</h3><div class="formula">$$\hat{S}(t) = \prod_{t_i\le t}\left(1-\frac{d_i}{n_i}\right) \qquad h(t\mid X) = h_0(t)e^{\beta_1 X_1} \qquad HR = e^{\beta_1}$$</div><h3>Likely exam question</h3><div class="callout"><em>Why can't a simple average of observed survival times be used to summarize a dataset with censoring, and how does the Kaplan-Meier estimator solve this?</em><br><br>Answer with: censored observations' true survival time is unknown, so a plain average would understate survival; KM builds survival probability from conditional "survived this interval" probabilities, using censored cases up to their last known survival time without needing their full survival time.</div><h3>Mnemonic</h3><p><strong>KM describes, log-rank compares, Cox adjusts</strong> — the same progression as descriptive statistics → group comparison → regression that structured this entire course.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>Censoring</summary><ol><li>How does left censoring or interval censoring differ from the right censoring covered here?</li></ol></details>
+        <details><summary>Kaplan-Meier</summary><ol><li>How is a confidence interval constructed around a Kaplan-Meier curve?</li></ol></details>
+        <details><summary>Log-rank test</summary><ol><li>What test would be preferred if survival curves cross rather than stay consistently separated?</li></ol></details>
+        <details><summary>Cox model</summary><ol><li>Why is the Cox model called "semi-parametric" rather than fully non-parametric or fully parametric?</li></ol></details>
+        <details><summary>Proportional hazards</summary><ol><li>What are the practical consequences of ignoring a violated proportional hazards assumption?</li><li>Will we work through a combined example spanning KM, log-rank, and Cox on the same dataset?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 8 · Survival Analysis.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'censoring': { kicker:'Topic A', title:'Time-to-event data & censoring', body:'<p>Survival analysis is built for outcomes measured as a duration until an event, where some participants\\' event times are not fully observed.</p><div class="definition"><strong>Right censoring:</strong> the most common form — a participant\\'s follow-up ends (study closes, they withdraw, or are lost to follow-up) before the event of interest occurs. Their contribution is "the event had not happened by time $t$," a genuinely informative fact, not missing data to discard.</div><div class="definition"><strong>Non-informative censoring:</strong> the core assumption that the reason a participant was censored carries no information about their underlying risk of the event, independent of the observed covariates.</div><h3>Why not just exclude censored cases?</h3><p>Discarding everyone who did not experience the event before the study ended would both shrink the sample and systematically bias it toward those with shorter survival times (since longer survivors are more likely to still be under observation, i.e., censored). Retaining censored cases in the risk set until their last known survival time is what lets Kaplan-Meier and Cox methods use all the available information correctly.</p><h3>When the assumption breaks down</h3><p>If patients drop out <em>because</em> their condition is worsening (informative censoring), standard survival methods will be biased — typically overestimating survival, since the sicker, more likely-to-fail patients disappear from the risk set disproportionately.</p><div class="caution"><strong>Always ask why follow-up ended</strong> for each censored case before assuming standard survival methods apply cleanly.</div>' },
+      'km': { kicker:'Topic B', title:'The Kaplan-Meier estimator', body:'<p>The Kaplan-Meier estimator provides a non-parametric estimate of the survival function without assuming any particular distribution (e.g., exponential, Weibull) for survival times.</p><div class="definition"><strong>Survival function:</strong> $S(t) = P(T > t)$, the probability that the event has not yet occurred by time $t$. It starts at 1 (everyone event-free at time 0) and is non-increasing.</div><h3>The step-function construction</h3><p>At each distinct time an event occurs, Kaplan-Meier computes the conditional probability of surviving that specific instant, given survival up to just before it: $1 - d_i/n_i$, where $d_i$ is the number of events at that time and $n_i$ is the number still at risk (not yet censored or failed). Multiplying these conditional probabilities across all event times up to $t$ gives the cumulative survival estimate.</p><div class="formula">$$\\hat{S}(t) = \\prod_{t_i \\le t}\\left(1-\\frac{d_i}{n_i}\\right)$$</div><h3>Reading the curve</h3><p>The KM curve is a step function: it drops at each event time (the size of the drop reflects how many events occurred relative to the number at risk) and stays flat between events. Censored observations mark the curve (often with a tick) but cause no drop — they simply reduce the risk set $n_i$ for subsequent times.</p><div class="caution"><strong>The tail of a KM curve is often unstable</strong> — when few subjects remain at risk (many events and censorings have already occurred), the estimate at late time points rests on very little data and should be interpreted cautiously.</div>' },
+      'logrank': { kicker:'Topic C', title:'The log-rank test', body:'<p>The log-rank test is the standard way to formally compare two or more Kaplan-Meier curves, rather than relying on visual impression alone.</p><div class="definition"><strong>Null hypothesis:</strong> the survival functions are identical across groups at every time point, $H_0: S_1(t) = S_2(t)$ for all $t$.</div><h3>How it works</h3><p>At each distinct event time across the combined groups, the log-rank test compares the observed number of events in each group to the number that would be expected if the groups had identical risk (based on how many from each group were at risk at that moment) — conceptually the same observed-vs-expected logic as the chi-square test in Week 5, but summed across every event time in the study rather than a single 2×2 table.</p><h3>What it does not do</h3><ul><li>It does not adjust for other covariates — it is a marginal (unadjusted) group comparison, analogous to how ANOVA (Week 5) does not control for confounders either.</li><li>It weights all time points equally, so it is most powerful when the hazard ratio between groups is roughly constant over time (the same proportional hazards idea from Topic E) and less powerful when survival curves cross.</li></ul><div class="caution"><strong>When curves cross,</strong> the log-rank test can produce a non-significant result even though the groups clearly differ at different points in follow-up — inspect the KM plot itself, not just the p-value.</div>' },
+      'cox': { kicker:'Topic D', title:'Cox proportional hazards model', body:'<p>The Cox model is the survival-analysis counterpart to multiple linear and logistic regression: it estimates the effect of covariates on the outcome while adjusting for other predictors simultaneously.</p><div class="definition"><strong>Hazard function:</strong> $h(t)$, the instantaneous rate of the event occurring at time $t$, given survival up to that point. Unlike $S(t)$, the hazard can rise, fall, or stay constant over time.</div><div class="definition"><strong>Cox model:</strong> $h(t\\mid X) = h_0(t)\\,e^{\\beta_1 X_1+\\dots+\\beta_k X_k}$. The baseline hazard $h_0(t)$ — the hazard when all covariates equal zero — is left completely unspecified, which is why the model is called <em>semi-parametric</em>: the covariate effects are parametric, the baseline hazard\\'s shape over time is not.</div><h3>Hazard ratios</h3><p>Exponentiating a coefficient gives a hazard ratio, $HR_j=e^{\\beta_j}$: the multiplicative change in the instantaneous hazard for a one-unit increase in $X_j$, holding other covariates fixed. This is structurally identical to reading an odds ratio in logistic regression (Week 7) — same exponentiation, same "holding other covariates constant" logic — but the hazard ratio describes instantaneous risk, not cumulative probability or odds.</p><h3>Why "proportional hazards"</h3><p>Because $h_0(t)$ is common to every subject, the ratio of hazards between any two covariate patterns is $e^{\\beta_1(X_{1a}-X_{1b})+\\dots}$ — a constant that does not depend on $t$. This constant-ratio structure is the "proportional hazards" the model is named for, and it is an assumption that must be checked, not a guaranteed property of the data (Topic E).</p><div class="caution"><strong>A large hazard ratio does not necessarily mean a large difference in median survival time</strong> — always report or plot the actual survival curves alongside the hazard ratio for a complete picture.</div>' },
+      'ph': { kicker:'Topic E', title:'Checking the proportional hazards assumption', body:'<p>The Cox model\\'s validity rests on the assumption that the hazard ratio between any two covariate patterns stays constant across all of follow-up time. This should always be checked, not assumed.</p><div class="definition"><strong>Proportional hazards assumption:</strong> the ratio $h(t\\mid X_a)/h(t\\mid X_b)$ does not depend on $t$ — the relative risk associated with a covariate is the same early and late in follow-up, even though the absolute hazard itself can change over time.</div><h3>Diagnostic tools</h3><ul><li><strong>Schoenfeld residuals:</strong> one set of residuals per covariate, computed at each event time; plotting them against time and checking for a flat (zero-slope) trend is the standard formal test. A significant trend indicates the covariate\\'s effect is changing over time.</li><li><strong>Log(-log(survival)) plots:</strong> under proportional hazards, plotting $\\ln(-\\ln \\hat{S}(t))$ against $\\ln(t)$ for each group should produce roughly parallel curves; converging or crossing curves suggest a violation.</li><li><strong>Time-interaction terms:</strong> adding a covariate × (function of time) interaction to the model and testing its significance directly tests whether that covariate\\'s hazard ratio changes over time.</li></ul><h3>Remedies</h3><p>If the assumption fails for a covariate, options include stratifying the model by that covariate (allowing a separate, unspecified baseline hazard per stratum, at the cost of not estimating that covariate\\'s own hazard ratio), splitting follow-up into time periods with separate hazard ratios in each, or fitting a covariate with a time-varying coefficient directly. This mirrors Week 6\\'s general philosophy: diagnose the specific violated assumption, then apply the remedy matched to that violation rather than abandoning the model outright.</p><div class="caution"><strong>Violated proportional hazards does not always mean "no effect"</strong> — it often means the effect\\'s size (or even direction) changes over follow-up time, which is itself a scientifically important finding worth reporting directly.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week08');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week08', undefined, () => SITE.renderLectureFooter('week08'));
+    SITE.renderLectureFooter('week08');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>

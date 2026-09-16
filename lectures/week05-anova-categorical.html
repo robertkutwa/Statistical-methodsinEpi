@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive study guide for ANOVA and categorical comparisons.">
+  <title>ANOVA & Categorical Comparisons | Study Guide</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('epi-site-theme') || 'light';</script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div id="siteNav" class="site-nav"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Session 2 · Week 5</div>
+      <h1>ANOVA & Categorical Comparisons</h1>
+      <div class="subtitle">Comparing more than two groups, and testing association between categorical variables.</div>
+      <div class="toolbar"><button class="button" id="themeToggle">☾ Toggle theme</button><button class="button" id="progressToggle">○ Mark as reviewed</button><button class="button" onclick="window.print()">⎙ Print guide</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="side-title">On this page</p>
+      <input class="search" id="search" type="search" placeholder="Filter sections…" aria-label="Filter sections">
+      <nav class="toc">
+        <a href="#summary">Summary</a><a href="#logic">ANOVA logic</a><a href="#table">ANOVA table</a><a href="#posthoc">Post-hoc tests</a><a href="#chisquare">Chi-square test</a><a href="#fisher">Fisher's exact test</a><a href="#pitfalls">Pitfalls</a><a href="#exam">Exam prep</a><a href="#questions">Questions</a>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section class="intro searchable" id="summary">
+        <h2>At a glance</h2>
+        <p>The t-test from Week 3 compares two groups. This week extends comparison to three or more groups (ANOVA) and to categorical outcomes (chi-square, Fisher's exact) — the standard tools before moving to regression-based approaches for multiple or continuous predictors.</p>
+        <div class="grid"><div class="mini"><strong>Compare means</strong>One-way ANOVA tests whether ≥3 group means differ.</div><div class="mini"><strong>Locate</strong>Post-hoc tests find which specific pairs differ.</div><div class="mini"><strong>Compare proportions</strong>Chi-square and Fisher's exact test association between categorical variables.</div></div>
+      </section>
+
+      <section class="topic searchable" id="logic"><div class="topic-head"><div class="number">A</div><h2>One-way ANOVA logic</h2></div>
+        <p>ANOVA (Analysis of Variance) tests $H_0: \mu_1=\mu_2=\dots=\mu_k$ by comparing two sources of variability.</p>
+        <div class="grid"><div class="mini"><strong>Between-group variance</strong>How much group means differ from the overall mean.</div><div class="mini"><strong>Within-group variance</strong>How much individual observations vary around their own group mean.</div></div>
+        <div class="formula">$$F = \frac{\text{Between-group variance}}{\text{Within-group variance}}$$</div>
+        <p>A large $F$ means group means differ more than would be expected from within-group noise alone, giving evidence against $H_0$.</p>
+      </section>
+
+      <section class="topic searchable" id="table"><div class="topic-head"><div class="number">B</div><h2>ANOVA table & assumptions</h2></div>
+        <p>ANOVA output is conventionally organized into a table partitioning total variability.</p>
+        <div class="table-wrap"><table><thead><tr><th>Source</th><th>df</th><th>Sum of squares</th><th>Mean square</th></tr></thead><tbody><tr><td>Between groups</td><td>$k-1$</td><td>SSB</td><td>MSB = SSB/(k-1)</td></tr><tr><td>Within groups</td><td>$n-k$</td><td>SSW</td><td>MSW = SSW/(n-k)</td></tr><tr><td>Total</td><td>$n-1$</td><td>SST</td><td></td></tr></tbody></table></div>
+        <p><strong>Assumptions:</strong> independence of observations, approximately normal residuals within each group, and equal variance across groups (homogeneity of variance) — the same LINE-style assumptions from Week 4, now applied to a categorical predictor.</p>
+      </section>
+
+      <section class="topic searchable" id="posthoc"><div class="topic-head"><div class="number">C</div><h2>Post-hoc comparisons</h2></div>
+        <p>A significant ANOVA F-test only says <em>some</em> groups differ — not which ones. Post-hoc tests make pairwise comparisons while controlling the overall (family-wise) Type I error rate.</p>
+        <div class="grid"><div class="mini"><strong>Tukey's HSD</strong>Standard choice for all pairwise comparisons after a significant ANOVA.</div><div class="mini"><strong>Bonferroni</strong>Divides α by the number of comparisons; simple but conservative.</div></div>
+        <div class="callout"><strong>Never run unadjusted pairwise t-tests</strong> after ANOVA — with $k$ groups there are $\binom{k}{2}$ comparisons, and each carries its own Type I error risk, inflating the overall false-positive rate well above 0.05.</div>
+      </section>
+
+      <section class="topic searchable" id="chisquare"><div class="topic-head"><div class="number">D</div><h2>Chi-square test of independence</h2></div>
+        <p>Tests whether two categorical variables are associated, using a contingency table of observed counts.</p>
+        <div class="formula">$$\chi^2 = \sum \frac{(O_i - E_i)^2}{E_i}$$</div>
+        <p>$E_i$ is the count expected under independence (row total × column total ÷ grand total). A large $\chi^2$ indicates observed counts deviate substantially from what independence would predict.</p>
+        <div class="callout"><strong>Validity condition:</strong> the chi-square approximation is reliable when expected cell counts are at least 5 in most cells. Smaller expected counts call for Fisher's exact test.</div>
+      </section>
+
+      <section class="topic searchable" id="fisher"><div class="topic-head"><div class="number">E</div><h2>Fisher's exact test</h2></div>
+        <p>For small samples or sparse 2×2 tables, Fisher's exact test calculates the exact probability of the observed table (and more extreme tables) under the hypergeometric distribution, rather than relying on the chi-square's large-sample approximation.</p>
+        <h3>When to prefer it</h3><ul><li>Any expected cell count below 5.</li><li>Small total sample size, even with a larger table.</li><li>When an exact p-value is preferred over an approximation, regardless of sample size.</li></ul>
+      </section>
+
+      <section class="accuracy searchable" id="pitfalls"><h2>Common pitfalls</h2><div class="table-wrap"><table><thead><tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td>Running many unadjusted t-tests instead of ANOVA</td><td>Seems simpler for &gt;2 groups, but inflates Type I error.</td><td>Use ANOVA first, then an adjusted post-hoc test only if the F-test is significant.</td></tr><tr><td>Using chi-square with small expected counts</td><td>The large-sample approximation breaks down.</td><td>Switch to Fisher's exact test when expected counts are low.</td></tr><tr><td>Interpreting a significant chi-square as showing causation or effect size</td><td>Chi-square tests association, not direction, strength, or causality.</td><td>Report an effect size (e.g., odds ratio, Week 1) alongside the test.</td></tr></tbody></table></div></section>
+
+      <section class="exam searchable" id="exam"><h2>Exam prep</h2><h3>Five things to memorize</h3><ul class="checklist"><li>ANOVA's F-statistic is between-group variance divided by within-group variance.</li><li>ANOVA assumptions mirror LINE: independence, approximate normality, equal variance across groups.</li><li>A significant F-test needs a post-hoc test (e.g., Tukey's HSD) to find which pairs differ.</li><li>Chi-square compares observed to expected counts under independence; needs expected counts ≥ 5.</li><li>Fisher's exact test replaces chi-square when expected counts are small.</li></ul><h3>Formula sheet</h3><div class="formula">$$F = \frac{MSB}{MSW} \qquad \chi^2 = \sum \frac{(O_i-E_i)^2}{E_i}$$</div><h3>Likely exam question</h3><div class="callout"><em>An ANOVA comparing four treatment groups gives p = 0.02. What can you conclude, and what is your next analytical step?</em><br><br>Answer with: at least one group mean differs from the others; run an adjusted post-hoc test (e.g., Tukey's HSD) to identify which specific pairs differ, rather than unadjusted pairwise t-tests.</div><h3>Mnemonic</h3><p><strong>ANOVA</strong> asks "do any means differ"; <strong>post-hoc</strong> asks "which ones"; <strong>chi-square</strong> and <strong>Fisher's exact</strong> do the same job for categorical, not continuous, outcomes.</p></section>
+
+      <section class="topic searchable" id="questions"><div class="topic-head"><div class="number">?</div><h2>Questions to take to class</h2></div><p>Use these prompts to turn the guide into an active revision session with your lecturer.</p>
+        <details><summary>ANOVA logic</summary><ol><li>How does one-way ANOVA relate to a regression model with a categorical predictor?</li></ol></details>
+        <details><summary>ANOVA table</summary><ol><li>What test is used to check the equal-variance assumption before trusting the F-test?</li></ol></details>
+        <details><summary>Post-hoc comparisons</summary><ol><li>When is Bonferroni preferred over Tukey's HSD despite being more conservative?</li></ol></details>
+        <details><summary>Chi-square</summary><ol><li>How does chi-square change when applied to a table larger than 2×2?</li></ol></details>
+        <details><summary>Fisher's exact test</summary><ol><li>Does Fisher's exact test generalize cleanly beyond a 2×2 table?</li></ol></details>
+      </section>
+
+      <section class="next-steps" id="lectureFooter"></section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="topicModal" role="presentation">
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top"><div><p class="modal-kicker" id="modalKicker"></p><h2 id="modalTitle"></h2></div><button class="modal-close" id="modalClose" type="button" aria-label="Close topic details">&times;</button></div>
+      <div id="modalBody"></div>
+    </article>
+  </div>
+  <footer>Statistical Methods in Epidemiology · Week 5 · ANOVA & Categorical Comparisons.</footer>
+  <script src="../script.js"></script>
+  <script>
+    const topicDetails = {
+      'logic': { kicker:'Topic A', title:'One-way ANOVA logic', body:'<p>ANOVA extends the two-sample t-test\\'s logic to three or more groups by comparing two ways of measuring spread in the data.</p><div class="definition"><strong>Between-group variance:</strong> reflects how far each group\\'s mean sits from the overall (grand) mean, weighted by group size. Large when groups genuinely differ.</div><div class="definition"><strong>Within-group variance:</strong> reflects how much individual observations scatter around their own group\\'s mean, unrelated to which group they belong to. This is the "noise floor."</div><h3>Why a ratio?</h3><p>The F-statistic compares signal (between-group differences) to noise (within-group scatter). If group means are truly identical, both the between- and within-group variance estimate the same underlying error variance, so $F\\approx 1$. As true group differences grow relative to noise, $F$ grows.</p><h3>Connection to the t-test</h3><p>With exactly two groups, ANOVA\\'s F-test and the two-sample t-test give mathematically equivalent conclusions — in fact $F=t^2$ in that special case. ANOVA is the natural generalization once a third group is added.</p><div class="caution"><strong>ANOVA does not tell you which groups differ</strong> — only that at least one does. That requires a post-hoc test (Topic C).</div>' },
+      'table': { kicker:'Topic B', title:'ANOVA table & assumptions', body:'<p>The ANOVA table partitions the total variability in the data (SST) into the portion explained by group membership (SSB) and the portion left unexplained (SSW).</p><div class="definition"><strong>Degrees of freedom:</strong> between-groups df is $k-1$ (number of groups minus one); within-groups df is $n-k$ (total observations minus number of groups). These sum to $n-1$, the total df.</div><div class="definition"><strong>Mean squares:</strong> each sum of squares divided by its degrees of freedom, producing a per-df variance estimate that can be compared via the F-ratio.</div><h3>Assumptions</h3><ul><li><strong>Independence:</strong> observations, and especially group assignments, are not correlated with each other.</li><li><strong>Normality:</strong> residuals within each group are approximately normal — most important for small group sizes; large samples are protected by the CLT (Week 2).</li><li><strong>Homogeneity of variance:</strong> all groups share the same underlying variance. Checked with Levene\\'s test or by inspecting group-wise spread.</li></ul><h3>What happens when assumptions fail</h3><p>Violated homogeneity of variance is handled with a Welch-corrected ANOVA; non-normal residuals in small samples may call for a non-parametric alternative such as the Kruskal-Wallis test.</p><div class="caution"><strong>Unequal group sizes</strong> make ANOVA more sensitive to unequal variances — check assumptions especially carefully when groups are unbalanced.</div>' },
+      'posthoc': { kicker:'Topic C', title:'Post-hoc comparisons', body:'<p>A significant ANOVA result answers "is there any difference among groups," not "where is the difference." Post-hoc tests answer the second question while controlling the overall error rate across multiple comparisons.</p><div class="definition"><strong>Family-wise error rate:</strong> the probability of making at least one Type I error across a whole set of comparisons. Running $\\binom{k}{2}$ unadjusted t-tests inflates this well above the nominal α for any single test.</div><div class="definition"><strong>Tukey\\'s HSD (Honestly Significant Difference):</strong> designed specifically for all pairwise comparisons among group means after ANOVA; controls the family-wise error rate while remaining less conservative than a blanket Bonferroni correction.</div><div class="definition"><strong>Bonferroni correction:</strong> divides the target α by the number of comparisons (e.g., α/10 for 10 pairwise tests). Simple and general-purpose, but increasingly conservative as the number of comparisons grows.</div><h3>Choosing between them</h3><p>Tukey\\'s HSD is the standard choice when all pairwise comparisons among means are of interest. Bonferroni remains useful for a small number of pre-specified, planned comparisons, or when combining several different types of test where a specialized method like Tukey\\'s does not directly apply.</p><div class="caution"><strong>Only run post-hoc tests after a significant omnibus F-test</strong> — post-hoc testing on a non-significant ANOVA result is a form of the same multiple-comparisons problem the correction exists to prevent.</div>' },
+      'chisquare': { kicker:'Topic D', title:'Chi-square test of independence', body:'<p>The chi-square test asks whether two categorical variables are associated, by comparing the observed contingency table to the table expected if the variables were completely independent.</p><div class="definition"><strong>Expected count:</strong> under independence, $E_i = \\dfrac{\\text{row total} \\times \\text{column total}}{\\text{grand total}}$ for each cell.</div><div class="definition"><strong>Test statistic:</strong> $\\chi^2 = \\sum \\dfrac{(O_i-E_i)^2}{E_i}$, summed across every cell. Larger deviations between observed and expected counts produce a larger statistic.</div><h3>Degrees of freedom</h3><p>For an $r \\times c$ table, $df = (r-1)(c-1)$. This determines which chi-square reference distribution the test statistic is compared against.</p><h3>Validity condition</h3><p>The chi-square statistic\\'s distribution is only well-approximated by the theoretical chi-square distribution when expected cell counts are reasonably large — the common rule of thumb is at least 5 in at least 80% of cells, with no cell below 1. When this fails, especially in small or sparse tables, switch to Fisher\\'s exact test (Topic E).</p><h3>What chi-square does not give you</h3><p>A significant chi-square shows association exists but says nothing about its direction, strength, or clinical meaning. Report an effect size — an odds ratio for a 2×2 table, or Cramér\\'s V for larger tables — alongside the test.</p><div class="caution"><strong>Chi-square assumes independent observations</strong> — each subject should contribute to only one cell. Paired or matched categorical data need McNemar\\'s test instead.</div>' },
+      'fisher': { kicker:'Topic E', title:'Fisher\\'s exact test', body:'<p>Fisher\\'s exact test answers the same question as chi-square — are two categorical variables associated — but calculates an exact p-value rather than relying on a large-sample approximation.</p><div class="definition"><strong>Hypergeometric distribution:</strong> Fisher\\'s exact test fixes the row and column totals of a 2×2 table and calculates the exact probability of the observed table, and of every more extreme table with the same margins, under the null of no association.</div><h3>Why "exact" matters</h3><p>The chi-square test relies on a large-sample approximation that can be unreliable — often overstating significance — when expected cell counts are small. Fisher\\'s exact test has no such requirement, making it the safer default for small or sparse tables.</p><h3>When to use it</h3><ul><li>Any expected cell count in the corresponding chi-square table falls below about 5.</li><li>Total sample size is small, even if the table is not obviously sparse.</li><li>An exact p-value is preferred as a matter of course, regardless of sample size (computationally feasible for small tables).</li></ul><h3>Limitations</h3><p>The classic formulation applies directly to 2×2 tables; extensions exist for larger tables but become computationally intensive as dimensions grow, which is part of why chi-square remains the default for large, well-populated tables.</p><div class="caution"><strong>Fisher\\'s exact test is conditional on both margins being fixed</strong> — a modeling assumption that does not always match how the data were actually collected, though it is usually treated as a reasonable approximation in practice.</div>' }
+    };
+    SITE.initTheme();
+    SITE.initNav('week05');
+    SITE.initSearch();
+    SITE.initTopicModals(topicDetails);
+    SITE.initProgressToggle('week05', undefined, () => SITE.renderLectureFooter('week05'));
+    SITE.renderLectureFooter('week05');
+  </script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>
